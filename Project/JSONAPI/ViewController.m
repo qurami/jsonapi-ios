@@ -8,7 +8,7 @@
 
 #import "ViewController.h"
 
-#import "JSONAPIDocument.h"
+#import "JSONAPI.h"
 
 #import "CommentResource.h"
 #import "PeopleResource.h"
@@ -22,7 +22,28 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+
+    JSONAPICall *call = [JSONAPICall new];
+    call.endpoint = @"http://beta.organizations.bdms.qurami.net";
+    call.includedResources = @[@"offices"];
     
+    [call getJSONAPIWithPath:@"organizations" completionHandler:^(JSONAPIDocument *jsonApi, NSInteger statusCode) {
+        
+        JSONAPIResource *quramiResource;
+        NSArray *allResources = (NSArray *) jsonApi.data;
+        for (JSONAPIResource *thisResource in allResources) {
+            if([thisResource.ID isEqualToString:@"1"]){
+                quramiResource = thisResource;
+                break;
+            }
+        }
+        
+        NSArray *quramiOffices = [jsonApi includedResourcesForJSONAPIResource: quramiResource];
+        NSLog(@"resource %@ has %ld included resources", quramiResource.attributes[@"name"], [quramiOffices count]);
+        
+    } failureHandler:^(NSError *error) {
+        NSLog(@"here");
+    }];
     
 }
 

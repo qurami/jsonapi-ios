@@ -34,7 +34,7 @@
 
 - (void) getJSONAPIWithPath: (NSString *) path completionHandler:(void (^)(JSONAPIDocument *jsonApi, NSInteger statusCode))completionHandler failureHandler:(void (^)(NSError *error))failureHandler{
 
-    [self getJSONAPIWithPath: path includedResourceTypes: nil completionHandler: completionHandler failureHandler: failureHandler];
+    [self getJSONAPIWithPath: path includedResourceTypes: _includedResources completionHandler: completionHandler failureHandler: failureHandler];
     
 }
 
@@ -142,6 +142,7 @@
     }
     else{
         
+
         NSString *mimeType = task.response.MIMEType;
         
         if([mimeType containsString:@"application/vnd.api+json"])

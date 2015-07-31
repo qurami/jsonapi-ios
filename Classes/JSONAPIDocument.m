@@ -78,31 +78,11 @@
     
     // Parse resources
     id rawData = _dictionary[@"data"];
-    
-    NSMutableArray *resources = [NSMutableArray new];
-    if ([rawData isKindOfClass:[NSArray class]]) {
-        
-        NSArray *rawResourcesArray = (NSArray*) rawData;
-        for (NSDictionary *rawResource in rawResourcesArray) {
-            id resource = [self inflateResourceData:rawResource];
-            if (resource) [resources addObject:resource];
-        }
-        
-        _data = resources;
-        
-    } else if ([rawData isKindOfClass:[NSDictionary class]]) {
-        id resource = [self inflateResourceData: rawData];
-        if (resource) _data = resource;
-    }
+    _data = [self inflateResourceData: rawData];
     
     // Parses included resources
     NSArray *rawIncludedArray = _dictionary[@"included"];
-    NSMutableArray *includedResources = [NSMutableArray new];
-    for (NSDictionary *data in rawIncludedArray) {
-        JSONAPIResource *resource = [self inflateResourceData:data];
-        if (resource) [includedResources addObject: resource];
-    }
-    _included = includedResources;
+    _included = [self inflateResourceData: rawIncludedArray];
     
     // Parse errors
     NSMutableArray *returnedErrors = [NSMutableArray new];
@@ -114,8 +94,14 @@
     _errors = returnedErrors;
 }
 
-- (id)inflateResourceData:(NSDictionary*)data {
-    return [JSONAPIResource jsonAPIResource:data];
+- (id)inflateResourceData:(id) data {
+    
+    if([data isKindOfClass:[NSDictionary class]])
+        return [JSONAPIResource jsonAPIResource: data];
+    else if([data isKindOfClass:[NSArray class]])
+        return [JSONAPIResource jsonAPIResources: data];
+    else
+        return nil;
 }
 
 - (NSArray *) includedResourcesForJSONAPIResource:(JSONAPIResource *)resource{

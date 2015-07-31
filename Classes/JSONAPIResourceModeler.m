@@ -7,6 +7,7 @@
 //
 
 #import "JSONAPIResourceModeler.h"
+#import "JSONAPIResource.h"
 
 @implementation JSONAPIResourceModeler
 
@@ -33,7 +34,13 @@
 }
 
 + (Class)resourceForLinkedType:(NSString *)linkedType {
-    return [[JSONAPIResourceModeler sharedModeler].resourceToLinkedType valueForKey:linkedType];
+    
+    Class linkedTypeClass = [[JSONAPIResourceModeler sharedModeler].resourceToLinkedType valueForKey:linkedType];
+    
+    if(!linkedTypeClass)
+        linkedTypeClass = [JSONAPIResource class];
+    
+    return linkedTypeClass;
 }
 
 + (void)unmodelAll {

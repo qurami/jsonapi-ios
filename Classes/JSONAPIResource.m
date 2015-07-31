@@ -31,7 +31,7 @@
 
 + (NSArray*)jsonAPIResources:(NSArray*)array {
     
-    NSMutableArray *mutableArray = @[].mutableCopy;
+    NSMutableArray *mutableArray = [[NSMutableArray alloc] initWithCapacity: [array count]];
     for (NSDictionary *dict in array) {
         NSString *type = dict[@"type"] ?: @"";
         Class resourceObjectClass = [JSONAPIResourceModeler resourceForLinkedType:type];
