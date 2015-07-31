@@ -8,7 +8,7 @@
 
 #import "JSONAPI.h"
 
-#import "JSONAPIErrorResource.h"
+#import "JSONAPIError.h"
 
 @interface JSONAPI(){
 
@@ -108,7 +108,7 @@
     NSMutableArray *returnedErrors = [NSMutableArray new];
     for (NSDictionary *rawError in _dictionary[@"errors"]) {
         
-        JSONAPIErrorResource *resource = [[JSONAPIErrorResource alloc] initWithDictionary:rawError];
+        JSONAPIError *resource = [[JSONAPIError alloc] initWithDictionary:rawError];
         if (resource) [returnedErrors addObject:resource];
     }
     _errors = returnedErrors;

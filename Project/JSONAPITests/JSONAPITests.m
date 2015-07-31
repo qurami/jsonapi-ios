@@ -9,7 +9,7 @@
 #import <XCTest/XCTest.h>
 
 #import "JSONAPI.h"
-#import "JSONAPIErrorResource.h"
+#import "JSONAPIError.h"
 
 #import "CommentResource.h"
 #import "PeopleResource.h"

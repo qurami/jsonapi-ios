@@ -8,7 +8,7 @@
 
 #import "JSONAPIResource.h"
 
-@interface JSONAPIErrorResource : NSObject
+@interface JSONAPIError : NSObject
 
 @property (nonatomic, strong) NSString *ID;
 @property (nonatomic, strong) NSString *status;

@@ -6,9 +6,9 @@
 //  Copyright (c) 2015 Josh Holtz. All rights reserved.
 //
 
-#import "JSONAPIErrorResource.h"
+#import "JSONAPIError.h"
 
-@implementation JSONAPIErrorResource
+@implementation JSONAPIError
 
 - (NSDictionary *)mapKeysToProperties {
     return @{
