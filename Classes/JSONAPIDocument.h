@@ -24,7 +24,6 @@
 @property (nonatomic, strong, readonly) NSArray *included;
 
 
-@property (nonatomic, strong, readonly) NSError *internalError;
 
 // Initializers
 + (instancetype)jsonAPIWithDictionary:(NSDictionary *)dictionary;

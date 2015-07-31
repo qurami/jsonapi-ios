@@ -52,8 +52,6 @@
     
     if ([json isKindOfClass:[NSDictionary class]] == YES) {
         [self inflateWithDictionary:json];
-    } else {
-        _internalError = [NSError errorWithDomain:@"Could not parse JSON" code:0 userInfo:nil];
     }
 }
 
@@ -67,24 +65,17 @@
 
 - (void)inflateWithDictionary:(NSDictionary*)dictionary {
     
-    // Sets internal dictionary
     _dictionary = dictionary;
-    
-    // Sets meta
     _meta = dictionary[@"meta"];
-    if (![_meta isKindOfClass:[NSDictionary class]]) {
-        _meta = nil;
-    }
+    _jsonApi = dictionary[@"jsonApi"];
+    _links = dictionary[@"links"];
     
-    // Parse resources
     id rawData = _dictionary[@"data"];
     _data = [self inflateResourceData: rawData];
     
-    // Parses included resources
     NSArray *rawIncludedArray = _dictionary[@"included"];
     _included = [self inflateResourceData: rawIncludedArray];
     
-    // Parse errors
     NSMutableArray *returnedErrors = [NSMutableArray new];
     for (NSDictionary *rawError in _dictionary[@"errors"]) {
         
