@@ -8,7 +8,6 @@
 
 #import "JSONAPIResource.h"
 
-#import "JSONAPI.h"
 #import "JSONAPIResourceFormatter.h"
 #import "JSONAPIResourceModeler.h"
 

@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class JSONAPI;
+@class JSONAPIDocument;
 
 @interface JSONAPICall : NSObject <NSURLSessionDataDelegate, NSURLSessionTaskDelegate>
 
@@ -27,8 +27,8 @@
 - (void) appendAdditionalHTTPHeaders: (NSDictionary *) additionalHeaders;
 
 
-- (void) getJSONAPIWithPath: (NSString *) path completionHandler: (void(^)(JSONAPI *jsonApi, NSInteger statusCode)) completionHandler failureHandler: (void(^)(NSError *error)) failureHandler;
+- (void) getJSONAPIWithPath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *jsonApi, NSInteger statusCode)) completionHandler failureHandler: (void(^)(NSError *error)) failureHandler;
 
-- (void) getJSONAPIWithPath: (NSString *) path includedResourceTypes: (NSArray *) includedResourceTypes completionHandler: (void(^)(JSONAPI *jsonApi, NSInteger statusCode)) completionHandler failureHandler: (void(^)(NSError *error)) failureHandler;
+- (void) getJSONAPIWithPath: (NSString *) path includedResourceTypes: (NSArray *) includedResourceTypes completionHandler: (void(^)(JSONAPIDocument *jsonApi, NSInteger statusCode)) completionHandler failureHandler: (void(^)(NSError *error)) failureHandler;
 
 @end

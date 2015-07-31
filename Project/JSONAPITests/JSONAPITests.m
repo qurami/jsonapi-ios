@@ -8,7 +8,7 @@
 
 #import <XCTest/XCTest.h>
 
-#import "JSONAPI.h"
+#import "JSONAPIDocument.h"
 #import "JSONAPIError.h"
 
 #import "CommentResource.h"
@@ -38,7 +38,7 @@
     NSString *path = [[NSBundle mainBundle] pathForResource:@"main_example" ofType:@"json"];
     NSString *jsonStr = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
     
-    JSONAPI *api = [JSONAPI jsonAPIWithString: jsonStr];
+    JSONAPIDocument *api = [JSONAPIDocument jsonAPIWithString: jsonStr];
     PostResource *res = (PostResource *) api.data;
     
     XCTAssertNotNil( res );

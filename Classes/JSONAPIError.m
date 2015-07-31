@@ -10,22 +10,13 @@
 
 @implementation JSONAPIError
 
-- (NSDictionary *)mapKeysToProperties {
-    return @{
-             @"status" : @"status",
-             @"code" : @"code",
-             @"title" : @"title",
-             @"detail" : @"detail",
-             @"paths" : @"paths",
-             };
-}
 
 - (id) initWithDictionary: (NSDictionary *) errorData{
     
     if(self = [super init]){
         
         self.ID = errorData[@"ID"];
-        self.status = errorData[@"status"];
+        self.status = [errorData[@"status"] integerValue];
         self.code = errorData[@"code"];
         self.title = errorData[@"title"];
         self.detail = errorData[@"detail"];

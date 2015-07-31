@@ -8,7 +8,7 @@
 
 #import "ViewController.h"
 
-#import "JSONAPI.h"
+#import "JSONAPIDocument.h"
 
 #import "CommentResource.h"
 #import "PeopleResource.h"

@@ -6,27 +6,27 @@
 //  Copyright (c) 2013 Josh Holtz. All rights reserved.
 //
 
-#import "JSONAPI.h"
-
+#import "JSONAPIDocument.h"
+#import "JSONAPIResource.h"
 #import "JSONAPIError.h"
 
-@interface JSONAPI(){
+@interface JSONAPIDocument(){
 
     NSDictionary *_dictionary;
 }
 
 @end
 
-@implementation JSONAPI
+@implementation JSONAPIDocument
 
 #pragma mark - Class
 
 + (instancetype)jsonAPIWithDictionary:(NSDictionary *)dictionary {
-    return [[JSONAPI alloc] initWithDictionary:dictionary];
+    return [[JSONAPIDocument alloc] initWithDictionary:dictionary];
 }
 
 + (instancetype)jsonAPIWithString:(NSString *)string {
-    return [[JSONAPI alloc] initWithString:string];
+    return [[JSONAPIDocument alloc] initWithString:string];
 }
 
 #pragma mark - Instance

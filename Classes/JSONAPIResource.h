@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class JSONAPI;
+@class JSONAPIDocument;
 
 @interface JSONAPIResource : NSObject
 

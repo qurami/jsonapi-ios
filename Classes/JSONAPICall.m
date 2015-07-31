@@ -7,11 +7,11 @@
 //
 
 #import "JSONAPICall.h"
-#import "JSONAPI.h"
+#import "JSONAPIDocument.h"
 
 @interface JSONAPICall (){
     
-    void (^_completionHandler)(JSONAPI *jsonApiDocument, NSInteger statusCode);
+    void (^_completionHandler)(JSONAPIDocument *jsonApiDocument, NSInteger statusCode);
     void (^_failureHandler)(NSError *error);
     
     
@@ -32,13 +32,13 @@
 @implementation JSONAPICall
 
 
-- (void) getJSONAPIWithPath: (NSString *) path completionHandler:(void (^)(JSONAPI *jsonApi, NSInteger statusCode))completionHandler failureHandler:(void (^)(NSError *error))failureHandler{
+- (void) getJSONAPIWithPath: (NSString *) path completionHandler:(void (^)(JSONAPIDocument *jsonApi, NSInteger statusCode))completionHandler failureHandler:(void (^)(NSError *error))failureHandler{
 
     [self getJSONAPIWithPath: path includedResourceTypes: nil completionHandler: completionHandler failureHandler: failureHandler];
     
 }
 
-- (void) getJSONAPIWithPath: (NSString *) path includedResourceTypes: (NSArray *) includedResourceTypes completionHandler:(void (^)(JSONAPI *jsonApi, NSInteger statusCode))completionHandler failureHandler:(void (^)(NSError *error))failureHandler{
+- (void) getJSONAPIWithPath: (NSString *) path includedResourceTypes: (NSArray *) includedResourceTypes completionHandler:(void (^)(JSONAPIDocument *jsonApi, NSInteger statusCode))completionHandler failureHandler:(void (^)(NSError *error))failureHandler{
     
     _HTTPMethod = @"POST";
     _includedResources = includedResourceTypes;
@@ -184,7 +184,7 @@
     
     NSString *jsonDataString = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
     
-    JSONAPI *jsonApiDocument = [JSONAPI jsonAPIWithString: jsonDataString];
+    JSONAPIDocument *jsonApiDocument = [JSONAPIDocument jsonAPIWithString: jsonDataString];
     
     if(_completionHandler)
         _completionHandler(jsonApiDocument, statusCode);
