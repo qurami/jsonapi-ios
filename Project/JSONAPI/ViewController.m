@@ -30,7 +30,7 @@
     
     NSArray *resourcesToInclude = @[@"offices"];
     
-    [call getJSONAPIDocumentWithPath:@"organizations" includedResourceTypes: resourcesToInclude completionHandler:^(JSONAPIDocument *jsonApi, NSInteger statusCode) {
+    [call getJSONAPIDocumentWithPath:@"organizations/x" includedResourceTypes: resourcesToInclude completionHandler:^(JSONAPIDocument *jsonApi, NSInteger statusCode) {
         
         JSONAPIResource *quramiResource;
         NSArray *allResources = (NSArray *) jsonApi.data;

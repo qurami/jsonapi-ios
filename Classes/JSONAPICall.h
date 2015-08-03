@@ -10,6 +10,14 @@
 
 @class JSONAPIDocument;
 
+
+typedef enum JSONAPIErrorCodes{
+
+    kMimetypeError = 415,
+    kMalformedContentError = 400
+ 
+}JSONAPIErrorCodes;
+
 @interface JSONAPICall : NSObject <NSURLSessionDataDelegate, NSURLSessionTaskDelegate>
 
 //the endpoint of the json api call

@@ -143,22 +143,15 @@
             _failureHandler(error);
     }
     else{
-        
 
         NSString *mimeType = task.response.MIMEType;
+        BOOL isJSONAPIMimeType = [mimeType containsString:@"application/vnd.api+json"];
         
-        if([mimeType containsString:@"application/vnd.api+json"])
+        if(isJSONAPIMimeType || statusCode == 204){
             [self jsonApiCallCompletedWithData: _requestReceivedData statusCode: statusCode];
+        }
         else{
-            NSDictionary *userInfo = @{
-                                       NSLocalizedDescriptionKey: @"bad response",
-                                       NSLocalizedFailureReasonErrorKey: @"MIME Type was not application/vnd.api+json",
-                                       NSLocalizedRecoverySuggestionErrorKey: @"for further information: http://jsonapi.org"
-                                       };
-            
-            NSError *mimeTypeError = [NSError errorWithDomain:@"JSONAPIErrorDomain" code:415 userInfo:userInfo];
-            _failureHandler(mimeTypeError);
-        
+                [self returnMimetypeError];
         }
     }
     
@@ -185,14 +178,52 @@
 
 - (void) jsonApiCallCompletedWithData: (NSData *) data statusCode: (NSInteger) statusCode{
     
-    NSString *jsonDataString = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
     
-    JSONAPIDocument *jsonApiDocument = [JSONAPIDocument jsonAPIWithString: jsonDataString];
+    if(statusCode == 204){
+        _completionHandler(nil, statusCode);
+    }
+    else{
+        
+        NSString *jsonDataString = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
+        JSONAPIDocument *jsonApiDocument = [JSONAPIDocument jsonAPIWithString: jsonDataString];
+        
+        if(!jsonApiDocument)
+            [self returnMalformedDataError];
+        
+        else{
+            if(_completionHandler)
+                _completionHandler(jsonApiDocument, statusCode);
+        }
+        
     
-    if(_completionHandler)
-        _completionHandler(jsonApiDocument, statusCode);
+    }
     
 }
 
+- (void) returnMalformedDataError{
+    
+    NSDictionary *userInfo = @{
+                               NSLocalizedDescriptionKey: @"bad response",
+                               NSLocalizedFailureReasonErrorKey: @"Unable to parse json data into JSONAPIDocument",
+                               NSLocalizedRecoverySuggestionErrorKey: @"for further information: http://jsonapi.org"
+                               };
+    
+    NSError *mimeTypeError = [NSError errorWithDomain:@"JSONAPIErrorDomain" code:kMalformedContentError userInfo:userInfo];
+    _failureHandler(mimeTypeError);
+
+}
+
+- (void) returnMimetypeError{
+    NSDictionary *userInfo = @{
+                               NSLocalizedDescriptionKey: @"bad response",
+                               NSLocalizedFailureReasonErrorKey: @"MIME Type was not application/vnd.api+json",
+                               NSLocalizedRecoverySuggestionErrorKey: @"for further information: http://jsonapi.org"
+                               };
+    
+    NSError *mimeTypeError = [NSError errorWithDomain:@"JSONAPIErrorDomain" code:kMimetypeError userInfo:userInfo];
+    _failureHandler(mimeTypeError);
+    
+
+}
 
 @end
