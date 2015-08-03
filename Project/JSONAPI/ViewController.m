@@ -14,7 +14,9 @@
 #import "PeopleResource.h"
 #import "PostResource.h"
 
-@interface ViewController ()
+@interface ViewController (){
+
+}
 
 @end
 
@@ -25,9 +27,10 @@
 
     JSONAPICall *call = [JSONAPICall new];
     call.endpoint = @"http://beta.organizations.bdms.qurami.net";
-    call.includedResources = @[@"offices"];
     
-    [call getJSONAPIWithPath:@"organizations" completionHandler:^(JSONAPIDocument *jsonApi, NSInteger statusCode) {
+    NSArray *resourcesToInclude = @[@"offices"];
+    
+    [call getJSONAPIDocumentWithPath:@"organizations" includedResourceTypes: resourcesToInclude completionHandler:^(JSONAPIDocument *jsonApi, NSInteger statusCode) {
         
         JSONAPIResource *quramiResource;
         NSArray *allResources = (NSArray *) jsonApi.data;

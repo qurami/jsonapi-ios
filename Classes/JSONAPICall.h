@@ -15,9 +15,6 @@
 //the endpoint of the json api call
 @property (strong, nonatomic) NSString *endpoint;
 
-//array of resources to include to the received jsonapi document
-@property (strong, nonatomic) NSArray *includedResources;
-
 
 //for customization of default session configuration and for basic http auth
 @property (strong, nonatomic) NSURLSessionConfiguration *sessionConfiguration;
@@ -27,8 +24,8 @@
 - (void) appendAdditionalHTTPHeaders: (NSDictionary *) additionalHeaders;
 
 
-- (void) getJSONAPIWithPath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *jsonApi, NSInteger statusCode)) completionHandler failureHandler: (void(^)(NSError *error)) failureHandler;
+- (void) getJSONAPIDocumentWithPath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *jsonApi, NSInteger statusCode)) completionHandler failureHandler: (void(^)(NSError *error)) failureHandler;
 
-- (void) getJSONAPIWithPath: (NSString *) path includedResourceTypes: (NSArray *) includedResourceTypes completionHandler: (void(^)(JSONAPIDocument *jsonApi, NSInteger statusCode)) completionHandler failureHandler: (void(^)(NSError *error)) failureHandler;
+- (void) getJSONAPIDocumentWithPath: (NSString *) path includedResourceTypes: (NSArray *) includedResourceTypes completionHandler: (void(^)(JSONAPIDocument *jsonApi, NSInteger statusCode)) completionHandler failureHandler: (void(^)(NSError *error)) failureHandler;
 
 @end

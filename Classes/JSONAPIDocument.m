@@ -66,6 +66,7 @@
 - (void)inflateWithDictionary:(NSDictionary*)dictionary {
     
     _dictionary = dictionary;
+    
     _meta = dictionary[@"meta"];
     _jsonApi = dictionary[@"jsonApi"];
     _links = dictionary[@"links"];

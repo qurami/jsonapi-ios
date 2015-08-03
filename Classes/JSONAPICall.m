@@ -20,6 +20,7 @@
     NSString *_apiPath;
     NSURL *_requestUrl;
     NSString *_requestBody;
+    NSArray *_includedResources;
     
     NSMutableData *_requestReceivedData;
     
@@ -32,15 +33,15 @@
 @implementation JSONAPICall
 
 
-- (void) getJSONAPIWithPath: (NSString *) path completionHandler:(void (^)(JSONAPIDocument *jsonApi, NSInteger statusCode))completionHandler failureHandler:(void (^)(NSError *error))failureHandler{
+- (void) getJSONAPIDocumentWithPath: (NSString *) path completionHandler:(void (^)(JSONAPIDocument *jsonApi, NSInteger statusCode))completionHandler failureHandler:(void (^)(NSError *error))failureHandler{
 
-    [self getJSONAPIWithPath: path includedResourceTypes: _includedResources completionHandler: completionHandler failureHandler: failureHandler];
+    [self getJSONAPIDocumentWithPath: path includedResourceTypes: nil completionHandler: completionHandler failureHandler: failureHandler];
     
 }
 
-- (void) getJSONAPIWithPath: (NSString *) path includedResourceTypes: (NSArray *) includedResourceTypes completionHandler:(void (^)(JSONAPIDocument *jsonApi, NSInteger statusCode))completionHandler failureHandler:(void (^)(NSError *error))failureHandler{
+- (void) getJSONAPIDocumentWithPath: (NSString *) path includedResourceTypes: (NSArray *) includedResourceTypes completionHandler:(void (^)(JSONAPIDocument *jsonApi, NSInteger statusCode))completionHandler failureHandler:(void (^)(NSError *error))failureHandler{
     
-    _HTTPMethod = @"POST";
+    _HTTPMethod = @"GET";
     _includedResources = includedResourceTypes;
     _completionHandler = completionHandler;
     _failureHandler = failureHandler;
@@ -59,18 +60,6 @@
 
 }
 
-- (void) buildURL{
-    
-    NSString *urlString = [_endpoint stringByAppendingPathComponent: _apiPath];
-    
-    if(_includedResources){
-        NSString *elements = [_includedResources componentsJoinedByString:@","];
-        urlString = [urlString stringByAppendingString:[NSString stringWithFormat:@"?include=%@", elements]];
-    }
-    
-    _requestUrl = [NSURL URLWithString: urlString];
-}
-
 - (void) buildHeaders{
     
     
@@ -84,12 +73,25 @@
 }
 
 - (void) appendAdditionalHTTPHeaders: (NSDictionary *) additionalHeaders{
-
+    
     if(!_additionalHTTPHeaders)
         _additionalHTTPHeaders = [NSMutableDictionary new];
     
     [_additionalHTTPHeaders addEntriesFromDictionary: additionalHeaders];
+    
+}
 
+
+- (void) buildURL{
+    
+    NSString *urlString = [_endpoint stringByAppendingPathComponent: _apiPath];
+    
+    if(_includedResources){
+        NSString *elements = [_includedResources componentsJoinedByString:@","];
+        urlString = [urlString stringByAppendingString:[NSString stringWithFormat:@"?include=%@", elements]];
+    }
+    
+    _requestUrl = [NSURL URLWithString: urlString];
 }
 
 - (void) configureSession{
@@ -154,7 +156,7 @@
                                        NSLocalizedRecoverySuggestionErrorKey: @"for further information: http://jsonapi.org"
                                        };
             
-            NSError *mimeTypeError = [NSError errorWithDomain:@"JSONAPIErrorDomain" code:-415 userInfo:userInfo];
+            NSError *mimeTypeError = [NSError errorWithDomain:@"JSONAPIErrorDomain" code:415 userInfo:userInfo];
             _failureHandler(mimeTypeError);
         
         }

@@ -20,7 +20,6 @@
 
 + (id)jsonAPIResource:(NSDictionary*)dictionary;
 + (NSArray*)jsonAPIResources:(NSArray*)array;
-
 - (id)initWithDictionary:(NSDictionary*)dict;
 
 - (NSDictionary *)mapMembersToProperties;
