@@ -6,13 +6,15 @@
 //  Copyright (c) 2015 Josh Holtz. All rights reserved.
 //
 
-#import "JSONAPICall.h"
+#import "JSONAPIClient.h"
 #import "JSONAPIDocument.h"
 
-@interface JSONAPICall (){
+
+
+
+@interface JSONAPIClient (){
     
-    void (^_completionHandler)(JSONAPIDocument *jsonApiDocument, NSInteger statusCode);
-    void (^_failureHandler)(NSError *error);
+    void (^_completionHandler)(JSONAPIDocument *jsonApiDocument, NSInteger statusCode, NSError *error);
     
     
     NSString *_HTTPMethod;
@@ -23,6 +25,7 @@
     NSArray *_includedResources;
     
     NSMutableData *_requestReceivedData;
+    NSInteger _requestReceivedStatusCode;
     
     NSURLSession *_urlSession;
 
@@ -30,21 +33,20 @@
 
 @end
 
-@implementation JSONAPICall
+@implementation JSONAPIClient
 
 
-- (void) getJSONAPIDocumentWithPath: (NSString *) path completionHandler:(void (^)(JSONAPIDocument *jsonApi, NSInteger statusCode))completionHandler failureHandler:(void (^)(NSError *error))failureHandler{
+- (void) getJSONAPIDocumentWithPath: (NSString *) path completionHandler:(void (^)(JSONAPIDocument *jsonApi, NSInteger statusCode, NSError *error))completionHandler{
 
-    [self getJSONAPIDocumentWithPath: path includedResourceTypes: nil completionHandler: completionHandler failureHandler: failureHandler];
+    [self getJSONAPIDocumentWithPath: path includedResourceTypes: nil completionHandler: completionHandler];
     
 }
 
-- (void) getJSONAPIDocumentWithPath: (NSString *) path includedResourceTypes: (NSArray *) includedResourceTypes completionHandler:(void (^)(JSONAPIDocument *jsonApi, NSInteger statusCode))completionHandler failureHandler:(void (^)(NSError *error))failureHandler{
+- (void) getJSONAPIDocumentWithPath: (NSString *) path includedResourceTypes: (NSArray *) includedResourceTypes completionHandler:(void (^)(JSONAPIDocument *jsonApi, NSInteger statusCode, NSError *error))completionHandler{
     
     _HTTPMethod = @"GET";
     _includedResources = includedResourceTypes;
     _completionHandler = completionHandler;
-    _failureHandler = failureHandler;
     _apiPath = path;
     
     [self startApiCall];
@@ -133,25 +135,22 @@
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error{
     
-    NSInteger statusCode = [(NSHTTPURLResponse *)task.response statusCode];
+    _requestReceivedStatusCode = [(NSHTTPURLResponse *)task.response statusCode];
     
     if(error){
-        
         NSLog(@"%@ : url session failed with error: %@", NSStringFromClass([self class]), error.localizedDescription);
-
-        if(_failureHandler)
-            _failureHandler(error);
+        [self returnCallbackWithError: error];
     }
     else{
 
         NSString *mimeType = task.response.MIMEType;
         BOOL isJSONAPIMimeType = [mimeType containsString:@"application/vnd.api+json"];
         
-        if(isJSONAPIMimeType || statusCode == 204){
-            [self jsonApiCallCompletedWithData: _requestReceivedData statusCode: statusCode];
+        if(isJSONAPIMimeType || _requestReceivedStatusCode == 204){
+            [self jsonApiCallCompletedWithData: _requestReceivedData statusCode: _requestReceivedStatusCode];
         }
         else{
-                [self returnMimetypeError];
+            [self returnCallbackWithError:[self mimetypeError]];
         }
     }
     
@@ -180,7 +179,7 @@
     
     
     if(statusCode == 204){
-        _completionHandler(nil, statusCode);
+        _completionHandler(nil, statusCode, nil);
     }
     else{
         
@@ -188,11 +187,11 @@
         JSONAPIDocument *jsonApiDocument = [JSONAPIDocument jsonAPIWithString: jsonDataString];
         
         if(!jsonApiDocument)
-            [self returnMalformedDataError];
+            [self returnCallbackWithError: [self malformedDataError]];
         
         else{
             if(_completionHandler)
-                _completionHandler(jsonApiDocument, statusCode);
+                _completionHandler(jsonApiDocument, statusCode, nil);
         }
         
     
@@ -200,7 +199,7 @@
     
 }
 
-- (void) returnMalformedDataError{
+- (NSError *) malformedDataError{
     
     NSDictionary *userInfo = @{
                                NSLocalizedDescriptionKey: @"bad response",
@@ -208,12 +207,13 @@
                                NSLocalizedRecoverySuggestionErrorKey: @"for further information: http://jsonapi.org"
                                };
     
-    NSError *mimeTypeError = [NSError errorWithDomain:@"JSONAPIErrorDomain" code:kMalformedContentError userInfo:userInfo];
-    _failureHandler(mimeTypeError);
+    NSError *malformedDataError = [NSError errorWithDomain:@"JSONAPIErrorDomain" code:kMalformedContentError userInfo:userInfo];
 
+    return malformedDataError;
+    
 }
 
-- (void) returnMimetypeError{
+- (NSError *) mimetypeError{
     NSDictionary *userInfo = @{
                                NSLocalizedDescriptionKey: @"bad response",
                                NSLocalizedFailureReasonErrorKey: @"MIME Type was not application/vnd.api+json",
@@ -221,8 +221,16 @@
                                };
     
     NSError *mimeTypeError = [NSError errorWithDomain:@"JSONAPIErrorDomain" code:kMimetypeError userInfo:userInfo];
-    _failureHandler(mimeTypeError);
     
+    return mimeTypeError;
+
+    
+}
+
+- (void) returnCallbackWithError: (NSError *) error{
+
+    if(_completionHandler)
+        _completionHandler(nil, _requestReceivedStatusCode, error);
 
 }
 

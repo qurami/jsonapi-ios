@@ -11,4 +11,4 @@
 #import "JSONAPIResourceFormatter.h"
 #import "JSONAPIResourceModeler.h"
 #import "JSONAPIError.h"
-#import "JSONAPICall.h"
+#import "JSONAPIClient.h"

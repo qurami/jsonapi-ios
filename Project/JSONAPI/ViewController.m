@@ -25,27 +25,34 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    JSONAPICall *call = [JSONAPICall new];
-    call.endpoint = @"http://beta.organizations.bdms.qurami.net";
+    JSONAPIClient *client = [JSONAPIClient new];
+    client.endpoint = @"http://beta.organizations.bdms.qurami.net";
     
     NSArray *resourcesToInclude = @[@"offices"];
     
-    [call getJSONAPIDocumentWithPath:@"organizations/x" includedResourceTypes: resourcesToInclude completionHandler:^(JSONAPIDocument *jsonApi, NSInteger statusCode) {
+    [client getJSONAPIDocumentWithPath:@"organizations/x" includedResourceTypes: resourcesToInclude completionHandler:^(JSONAPIDocument *jsonApi, NSInteger statusCode, NSError *error) {
         
-        JSONAPIResource *quramiResource;
-        NSArray *allResources = (NSArray *) jsonApi.data;
-        for (JSONAPIResource *thisResource in allResources) {
-            if([thisResource.ID isEqualToString:@"1"]){
-                quramiResource = thisResource;
-                break;
+        
+        if(!error){
+        
+            JSONAPIResource *quramiResource;
+            NSArray *allResources = (NSArray *) jsonApi.data;
+            for (JSONAPIResource *thisResource in allResources) {
+                if([thisResource.ID isEqualToString:@"1"]){
+                    quramiResource = thisResource;
+                    break;
+                }
             }
+            
+            NSArray *quramiOffices = [jsonApi includedResourcesForJSONAPIResource: quramiResource];
+            NSLog(@"resource %@ has %ld included resources", quramiResource.attributes[@"name"], [quramiOffices count]);
+            
         }
+        else{
+            
+            NSLog(@"error returned: %@", error.localizedDescription);
         
-        NSArray *quramiOffices = [jsonApi includedResourcesForJSONAPIResource: quramiResource];
-        NSLog(@"resource %@ has %ld included resources", quramiResource.attributes[@"name"], [quramiOffices count]);
-        
-    } failureHandler:^(NSError *error) {
-        NSLog(@"here");
+        }
     }];
     
 }

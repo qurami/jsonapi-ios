@@ -10,15 +10,16 @@
 
 @class JSONAPIDocument;
 
+extern NSString *const JSONAPIClientErrorDomain;
 
 typedef enum JSONAPIErrorCodes{
 
     kMimetypeError = 415,
     kMalformedContentError = 400
- 
+    
 }JSONAPIErrorCodes;
 
-@interface JSONAPICall : NSObject <NSURLSessionDataDelegate, NSURLSessionTaskDelegate>
+@interface JSONAPIClient : NSObject <NSURLSessionDataDelegate, NSURLSessionTaskDelegate>
 
 //the endpoint of the json api call
 @property (strong, nonatomic) NSString *endpoint;
@@ -32,8 +33,8 @@ typedef enum JSONAPIErrorCodes{
 - (void) appendAdditionalHTTPHeaders: (NSDictionary *) additionalHeaders;
 
 
-- (void) getJSONAPIDocumentWithPath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *jsonApi, NSInteger statusCode)) completionHandler failureHandler: (void(^)(NSError *error)) failureHandler;
+- (void) getJSONAPIDocumentWithPath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *jsonApi, NSInteger statusCode, NSError *error)) completionHandler;
 
-- (void) getJSONAPIDocumentWithPath: (NSString *) path includedResourceTypes: (NSArray *) includedResourceTypes completionHandler: (void(^)(JSONAPIDocument *jsonApi, NSInteger statusCode)) completionHandler failureHandler: (void(^)(NSError *error)) failureHandler;
+- (void) getJSONAPIDocumentWithPath: (NSString *) path includedResourceTypes: (NSArray *) includedResourceTypes completionHandler: (void(^)(JSONAPIDocument *jsonApi, NSInteger statusCode, NSError *error)) completionHandler;
 
 @end
