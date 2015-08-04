@@ -24,5 +24,7 @@
 
 - (NSDictionary *)mapMembersToProperties;
 
+- (NSArray *) getRelatedResourcesFromJSONAPIResourcesArray: (NSArray *) array;
+
 
 @end

@@ -96,42 +96,4 @@
         return nil;
 }
 
-- (NSArray *) includedResourcesForJSONAPIResource:(JSONAPIResource *)resource{
-    
-    NSMutableArray *includedResources = [NSMutableArray new];
-    
-    for(NSDictionary *relationship in [resource.relationships allValues]){
-        
-        NSDictionary *relationshipData = (relationship[@"data"] && (relationship[@"data"] != [NSNull null])) ? relationship[@"data"] : nil;
-        
-        if(relationshipData){
-            
-            if([relationshipData isKindOfClass:[NSArray class]]){
-                for (NSDictionary *thisResourceIdentifier in relationshipData) {
-                    NSString *relationshipType = thisResourceIdentifier[@"type"];
-                    NSString *relationshipId = thisResourceIdentifier[@"id"];
-                    
-                    for(JSONAPIResource *thisResource in _included){
-                        if([thisResource.ID isEqualToString: relationshipId] && [thisResource.type isEqualToString: relationshipType])
-                            [includedResources addObject: thisResource];
-                    }
-
-                }
-            }
-            else{
-                NSString *relationshipType = relationshipData[@"type"];
-                NSString *relationshipId = relationshipData[@"id"];
-                
-                for(JSONAPIResource *thisResource in _included){
-                    if([thisResource.ID isEqualToString: relationshipId] && [thisResource.type isEqualToString: relationshipType])
-                        [includedResources addObject: thisResource];
-                }
-            }
-        }
-    }
-    
-    return includedResources;
-
-}
-
 @end

@@ -150,6 +150,45 @@
 }
 
 
+- (NSArray *) getRelatedResourcesFromJSONAPIResourcesArray: (NSArray *) array{
+    
+    NSMutableArray *relationships = [NSMutableArray new];
+
+    
+    for(NSDictionary *relationship in [self.relationships allValues]){
+        
+        NSDictionary *relationshipData = (relationship[@"data"] && (relationship[@"data"] != [NSNull null])) ? relationship[@"data"] : nil;
+        
+        if(relationshipData){
+            
+            if([relationshipData isKindOfClass:[NSArray class]]){
+                for (NSDictionary *thisResourceIdentifier in relationshipData) {
+                    NSString *relationshipType = thisResourceIdentifier[@"type"];
+                    NSString *relationshipId = thisResourceIdentifier[@"id"];
+                    
+                    for(JSONAPIResource *thisResource in array){
+                        if([thisResource.ID isEqualToString: relationshipId] && [thisResource.type isEqualToString: relationshipType])
+                            [relationships addObject: thisResource];
+                    }
+                    
+                }
+            }
+            else{
+                NSString *relationshipType = relationshipData[@"type"];
+                NSString *relationshipId = relationshipData[@"id"];
+                
+                for(JSONAPIResource *thisResource in array){
+                    if([thisResource.ID isEqualToString: relationshipId] && [thisResource.type isEqualToString: relationshipType])
+                        [relationships addObject: thisResource];
+                }
+            }
+        }
+    }
+    
+    return relationships;
+
+}
+
 
 
 @end

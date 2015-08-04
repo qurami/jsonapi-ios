@@ -30,7 +30,7 @@
     
     NSArray *resourcesToInclude = @[@"offices"];
     
-    [client getJSONAPIDocumentWithPath:@"organizations/x" includedResourceTypes: resourcesToInclude completionHandler:^(JSONAPIDocument *jsonApi, NSInteger statusCode, NSError *error) {
+    [client getJSONAPIDocumentWithPath:@"/app/organizations" includedResourceTypes: resourcesToInclude completionHandler:^(JSONAPIDocument *jsonApi, NSInteger statusCode, NSError *error) {
         
         
         if(!error){
@@ -44,7 +44,7 @@
                 }
             }
             
-            NSArray *quramiOffices = [jsonApi includedResourcesForJSONAPIResource: quramiResource];
+            NSArray *quramiOffices = [quramiResource getRelatedResourcesFromJSONAPIResourcesArray: jsonApi.included];
             NSLog(@"resource %@ has %ld included resources", quramiResource.attributes[@"name"], [quramiOffices count]);
             
         }
