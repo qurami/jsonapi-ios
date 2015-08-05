@@ -26,5 +26,4 @@
 
 - (NSArray *) getRelatedResourcesFromJSONAPIResourcesArray: (NSArray *) array;
 
-
 @end

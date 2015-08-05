@@ -12,7 +12,6 @@
 
 @interface JSONAPIDocument(){
 
-    NSDictionary *_dictionary;
 }
 
 @end
@@ -21,11 +20,11 @@
 
 #pragma mark - Class
 
-+ (instancetype)jsonAPIWithDictionary:(NSDictionary *)dictionary {
++ (instancetype)jsonAPIDocumentWithDictionary:(NSDictionary *)dictionary {
     return [[JSONAPIDocument alloc] initWithDictionary:dictionary];
 }
 
-+ (instancetype)jsonAPIWithString:(NSString *)string {
++ (instancetype)jsonAPIDocumentWithString:(NSString *)string {
     return [[JSONAPIDocument alloc] initWithString:string];
 }
 
@@ -65,20 +64,20 @@
 
 - (void)inflateWithDictionary:(NSDictionary*)dictionary {
     
-    _dictionary = dictionary;
+    
     
     _meta = dictionary[@"meta"];
     _jsonApi = dictionary[@"jsonApi"];
     _links = dictionary[@"links"];
     
-    id rawData = _dictionary[@"data"];
+    id rawData = dictionary[@"data"];
     _data = [self inflateResourceData: rawData];
     
-    NSArray *rawIncludedArray = _dictionary[@"included"];
+    NSArray *rawIncludedArray = dictionary[@"included"];
     _included = [self inflateResourceData: rawIncludedArray];
     
     NSMutableArray *returnedErrors = [NSMutableArray new];
-    for (NSDictionary *rawError in _dictionary[@"errors"]) {
+    for (NSDictionary *rawError in dictionary[@"errors"]) {
         
         JSONAPIError *resource = [[JSONAPIError alloc] initWithDictionary:rawError];
         if (resource) [returnedErrors addObject:resource];
@@ -96,23 +95,5 @@
         return nil;
 }
 
-- (NSString *) toJson{
-    
-    
-    NSString *jsonString = nil;
-    NSError *error;
-    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:_dictionary
-                                                       options:0
-                                                         error:&error];
-    
-    if (! jsonData) {
-        NSLog(@"JSONAPIDocument error, unable to parse document to json: %@", error.localizedDescription);
-    } else {
-        jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    }
-    
-    return jsonString;
-
-}
 
 @end

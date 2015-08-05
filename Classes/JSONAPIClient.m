@@ -8,6 +8,7 @@
 
 #import "JSONAPIClient.h"
 #import "JSONAPIDocument.h"
+#import "JSONAPIJSONEncoder.h"
 
 
 NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
@@ -68,7 +69,7 @@ NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
     _includedResources = includedResourceTypes;
     _completionHandler = completionHandler;
     _apiPath = path;
-    _requestBody = [documentToPost toJson];
+    _requestBody = [JSONAPIJSONEncoder jsonEncodedStringForJSONAPIDocument: documentToPost];
     
     [self startApiCall];
     
@@ -211,7 +212,7 @@ NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
     else{
         
         NSString *jsonDataString = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
-        JSONAPIDocument *jsonApiDocument = [JSONAPIDocument jsonAPIWithString: jsonDataString];
+        JSONAPIDocument *jsonApiDocument = [JSONAPIDocument jsonAPIDocumentWithString: jsonDataString];
         
         if(!jsonApiDocument)
             [self returnCallbackWithError: [self malformedDataError]];

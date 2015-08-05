@@ -34,18 +34,21 @@
         
         
         if(!error){
-        
-            JSONAPIResource *quramiResource;
-            NSArray *allResources = (NSArray *) jsonApi.data;
-            for (JSONAPIResource *thisResource in allResources) {
-                if([thisResource.ID isEqualToString:@"1"]){
-                    quramiResource = thisResource;
-                    break;
-                }
-            }
             
-            NSArray *quramiOffices = [quramiResource getRelatedResourcesFromJSONAPIResourcesArray: jsonApi.included];
-            NSLog(@"resource %@ has %ld included resources", quramiResource.attributes[@"name"], [quramiOffices count]);
+            JSONAPIResource *quramiResource;
+            if(jsonApi.data){
+                NSArray *allResources = (NSArray *) jsonApi.data;
+                for (JSONAPIResource *thisResource in allResources) {
+                    if([thisResource.ID isEqualToString:@"1"]){
+                        quramiResource = thisResource;
+                        break;
+                    }
+                }
+                
+                
+                NSArray *quramiOffices = [quramiResource getRelatedResourcesFromJSONAPIResourcesArray: jsonApi.included];
+                NSLog(@"resource %@ has %ld included resources", quramiResource.attributes[@"name"], [quramiOffices count]);
+            }
             
         }
         else{

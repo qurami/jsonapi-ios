@@ -26,13 +26,12 @@
 
 
 // Initializers
-+ (instancetype)jsonAPIWithDictionary:(NSDictionary *)dictionary;
-+ (instancetype)jsonAPIWithString:(NSString *)string;
++ (instancetype)jsonAPIDocumentWithDictionary:(NSDictionary *)dictionary;
++ (instancetype)jsonAPIDocumentWithString:(NSString *)string;
 - (instancetype)initWithDictionary:(NSDictionary*)dictionary;
 - (instancetype)initWithString:(NSString*)string;
 
 - (BOOL)hasErrors;
 
-- (NSString *) toJson;
 
 @end

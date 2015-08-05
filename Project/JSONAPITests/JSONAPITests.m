@@ -38,7 +38,7 @@
     NSString *path = [[NSBundle mainBundle] pathForResource:@"main_example" ofType:@"json"];
     NSString *jsonStr = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:nil];
     
-    JSONAPIDocument *api = [JSONAPIDocument jsonAPIWithString: jsonStr];
+    JSONAPIDocument *api = [JSONAPIDocument jsonAPIDocumentWithString: jsonStr];
     PostResource *res = (PostResource *) api.data;
     
     XCTAssertNotNil( res );
