@@ -36,6 +36,7 @@ NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
 
 @implementation JSONAPIClient
 
+#pragma mark - HTTPMethods
 
 - (void) getJSONAPIDocumentWithPath: (NSString *) path completionHandler:(void (^)(JSONAPIDocument *jsonApi, NSInteger statusCode, NSError *error))completionHandler{
 
@@ -53,6 +54,31 @@ NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
     [self startApiCall];
 }
 
+- (void) postJSONAPIDocument: (JSONAPIDocument *) documentToPost withPath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *jsonApiDocument, NSInteger statusCode, NSError *error)) completionHandler{
+
+
+    [self postJSONAPIDocument: documentToPost withPath: path includedResources: nil completionHandler: completionHandler];
+    
+}
+
+- (void) postJSONAPIDocument: (JSONAPIDocument *) documentToPost withPath: (NSString *) path includedResources: (NSArray *) includedResourceTypes completionHandler: (void(^)(JSONAPIDocument *jsonApiDocument, NSInteger statusCode, NSError *error)) completionHandler{
+
+    
+    _HTTPMethod = @"POST";
+    _includedResources = includedResourceTypes;
+    _completionHandler = completionHandler;
+    _apiPath = path;
+    _requestBody = [documentToPost toJson];
+    
+    [self startApiCall];
+    
+
+}
+
+
+
+
+#pragma mark - API Call
 
 - (void) startApiCall{
 

@@ -96,4 +96,23 @@
         return nil;
 }
 
+- (NSString *) toJson{
+    
+    
+    NSString *jsonString = nil;
+    NSError *error;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:_dictionary
+                                                       options:0
+                                                         error:&error];
+    
+    if (! jsonData) {
+        NSLog(@"JSONAPIDocument error, unable to parse document to json: %@", error.localizedDescription);
+    } else {
+        jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    }
+    
+    return jsonString;
+
+}
+
 @end
