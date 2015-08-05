@@ -11,7 +11,7 @@
 @interface JSONAPIError : NSObject
 
 @property (nonatomic, strong) NSString *ID;
-@property (nonatomic, assign) NSInteger status;
+@property (nonatomic, strong) NSString *status;
 @property (nonatomic, strong) NSString *code;
 @property (nonatomic, strong) NSString *title;
 @property (nonatomic, strong) NSString *detail;

@@ -10,6 +10,7 @@
 #import "JSONAPIDocument.h"
 
 
+NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
 
 
 @interface JSONAPIClient (){
@@ -207,20 +208,21 @@
                                NSLocalizedRecoverySuggestionErrorKey: @"for further information: http://jsonapi.org"
                                };
     
-    NSError *malformedDataError = [NSError errorWithDomain:@"JSONAPIErrorDomain" code:kMalformedContentError userInfo:userInfo];
+    NSError *malformedDataError = [NSError errorWithDomain:JSONAPIClientErrorDomain code:kMalformedContentError userInfo:userInfo];
 
     return malformedDataError;
     
 }
 
 - (NSError *) mimetypeError{
+    
     NSDictionary *userInfo = @{
                                NSLocalizedDescriptionKey: @"bad response",
                                NSLocalizedFailureReasonErrorKey: @"MIME Type was not application/vnd.api+json",
                                NSLocalizedRecoverySuggestionErrorKey: @"for further information: http://jsonapi.org"
                                };
     
-    NSError *mimeTypeError = [NSError errorWithDomain:@"JSONAPIErrorDomain" code:kMimetypeError userInfo:userInfo];
+    NSError *mimeTypeError = [NSError errorWithDomain:JSONAPIClientErrorDomain code:kMimetypeError userInfo:userInfo];
     
     return mimeTypeError;
 
