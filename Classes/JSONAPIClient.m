@@ -77,6 +77,19 @@ NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
 }
 
 
+- (void) deleteJSONAPIResourceWithPath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *jsonApiDocument ,NSInteger statusCode, NSError *error)) completionHandler{
+    
+    _HTTPMethod = @"DELETE";
+    _includedResources = nil;
+    _apiPath = path;
+    _requestBody = nil;
+    _completionHandler = completionHandler;
+    
+    [self startApiCall];
+
+}
+
+
 
 
 #pragma mark - API Call
