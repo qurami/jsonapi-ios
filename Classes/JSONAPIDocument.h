@@ -14,14 +14,14 @@
 
 
 //mandatory members
-@property (nonatomic, strong, readonly) NSDictionary *meta;
-@property (nonatomic, strong, readonly) id data;
-@property (nonatomic, strong, readonly) NSArray *errors;
+@property (nonatomic, strong) NSDictionary *meta;
+@property (nonatomic, strong) id data;
+@property (nonatomic, strong) NSArray *errors;
 
 //optional members
-@property (nonatomic, strong, readonly) NSDictionary *jsonApi;
-@property (nonatomic, strong, readonly) NSArray *links;
-@property (nonatomic, strong, readonly) NSArray *included;
+@property (nonatomic, strong) NSDictionary *jsonApi;
+@property (nonatomic, strong) NSArray *links;
+@property (nonatomic, strong) NSArray *included;
 
 
 
