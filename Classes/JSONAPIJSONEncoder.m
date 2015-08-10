@@ -27,15 +27,15 @@
     if(document.data){
         
         if([document.data isKindOfClass: [JSONAPIResource class]])
-            rawData = [self jsonEncodedStringForJSONAPIResource: document.data];
+            rawData = [self dictionaryForJSONAPIResource: document.data];
         else if([document.data isKindOfClass:[NSArray class]] && [document.data count] > 0){
             
             NSMutableArray *rawData = [[NSMutableArray alloc] initWithCapacity: [document.data count]];
             
             for (JSONAPIResource *thisResource in document.data) {
-                NSString *jsonResource = [self jsonEncodedStringForJSONAPIResource: thisResource];
-                if(jsonResource)
-                    [rawData addObject: jsonResource];
+                NSDictionary *dictionaryResource = [self dictionaryForJSONAPIResource: thisResource];
+                if(dictionaryResource)
+                    [rawData addObject: dictionaryResource];
             }
         }
     }
@@ -49,9 +49,9 @@
         rawIncluded = [[NSMutableArray alloc] initWithCapacity: [document.included count]];
         
         for (JSONAPIResource *thisIncludedResource in document.included) {
-            NSString *jsonIncludedResource = [self jsonEncodedStringForJSONAPIResource: thisIncludedResource];
-            if(jsonIncludedResource)
-                [rawIncluded addObject: jsonIncludedResource];
+            NSDictionary *resourceDictionary = [self dictionaryForJSONAPIResource: thisIncludedResource];
+            if(resourceDictionary)
+                [rawIncluded addObject: resourceDictionary];
         }
     }
     
@@ -62,9 +62,9 @@
         
         rawErrors = [[NSMutableArray alloc] initWithCapacity: [document.errors count]];
         for (JSONAPIError *thisError in document.errors) {
-            NSString *jsonErrorString = [self jsonEncodedStringForJSONAPIError: thisError];
-            if(thisError)
-                [rawErrors addObject: jsonErrorString];
+            NSDictionary *jsonapiErrorDictionary = [self dictionaryForJSONAPIError: thisError];
+            if(jsonapiErrorDictionary)
+                [rawErrors addObject: jsonapiErrorDictionary];
         }
     }
     
@@ -73,7 +73,7 @@
     return [self jsonParseDictionary: rawDocument];
 }
 
-+ (NSString *) jsonEncodedStringForJSONAPIResource: (JSONAPIResource *) resource{
++ (NSDictionary *) dictionaryForJSONAPIResource: (JSONAPIResource *) resource{
     
     NSDictionary *rawResource = @{
                                   @"id" : [self jsonEncodableValueForObject: resource.ID],
@@ -82,13 +82,16 @@
                                   @"relationships" : [self jsonEncodableValueForObject:resource.relationships]
                                   };
     
-    return [self jsonParseDictionary: rawResource];
-    
-    
+    return rawResource;
     
 }
 
-+ (NSString *) jsonEncodedStringForJSONAPIError: (JSONAPIError *) jsonapiError{
++ (NSString *) jsonEncodedStringForJSONAPIResource: (JSONAPIResource *) resource{
+    
+    return [self jsonParseDictionary: [self dictionaryForJSONAPIResource: resource]];
+}
+
++ (NSDictionary *) dictionaryForJSONAPIError: (JSONAPIError *) jsonapiError{
     
     NSDictionary *rawError = @{
                                @"id" : [self jsonEncodableValueForObject: jsonapiError.ID],
@@ -101,7 +104,12 @@
                                @"meta" : [self jsonEncodableValueForObject: jsonapiError.meta]
                                };
     
-    return [self jsonParseDictionary: rawError];
+    return  rawError;
+}
+
++ (NSString *) jsonEncodedStringForJSONAPIError: (JSONAPIError *) jsonapiError{
+    
+    return [self jsonParseDictionary: [self dictionaryForJSONAPIError: jsonapiError]];
 }
 
 
