@@ -82,69 +82,68 @@
     return NO;
 }
 
-- (void)setWithDictionary:(NSDictionary*)dict {
+- (void)setWithDictionary: (NSDictionary*) rawResourceObjectDictionary {
     
-    _dictionary = dict;
+    _dictionary = rawResourceObjectDictionary;
     
-    //maps top level mandatory members of a JSONAPI Resource object
-    NSDictionary *topLevelMembers = @{
-                                      @"id" : @"ID",
-                                      @"type" : @"type",
-                                      };
-    
-    for(NSString *key in [topLevelMembers allKeys]){
-        
-        if ([dict objectForKey:key] != nil && [dict objectForKey:key] != [NSNull null]) {
-            NSString *property = [topLevelMembers objectForKey:key];
-            [self setValue:[dict objectForKey:key] forKey:property];
-        }
-        else{
-            NSLog(@"JSONAPIResource Warning : key %@ not found in json data.\nyour JSONAPI Resource Object is not compliant to JSONAPI format, for further reading please refer to: http://jsonapi.org/format/#document-resource-objects", key);
-        }
+
+    if(!rawResourceObjectDictionary[@"id"] || rawResourceObjectDictionary[@"id"] == [NSNull null] || [rawResourceObjectDictionary[@"id"] length] == 0){
+        NSLog(@"%@ warning: object is missing id, every jsonapiresource MUST have an id. For further reading please refer to: http://jsonapi.org/format/#document-resource-objects ", NSStringFromClass([self class]));
     }
+    else
+        self.ID = rawResourceObjectDictionary[@"id"];
     
-    NSDictionary *resourceObjectAttributes = (dict[@"attributes"] && (dict[@"attributes"] != [NSNull null])) ? dict[@"attributes"] : nil;
-    if(resourceObjectAttributes){
-        self.attributes = resourceObjectAttributes;
+    if(!rawResourceObjectDictionary[@"type"] ||  rawResourceObjectDictionary[@"type"] == [NSNull null] || [rawResourceObjectDictionary[@"type"] length] == 0){
+        NSLog(@"%@ warning: object is missing type, every jsonapiresource MUST have a type. For further reading please refer to: http://jsonapi.org/format/#document-resource-objects ", NSStringFromClass([self class]));
+    }
+    else
+        self.type = rawResourceObjectDictionary[@"type"];
+    
+    
+    
+    NSDictionary *rawResourceObjectAttributesDictionary = (rawResourceObjectDictionary[@"attributes"] && (rawResourceObjectDictionary[@"attributes"] != [NSNull null])) ? rawResourceObjectDictionary[@"attributes"] : nil;
+    
+    if(rawResourceObjectAttributesDictionary){
+        self.attributes = rawResourceObjectAttributesDictionary;
     }
     else
         self.attributes = @{};
     
-    NSDictionary *resourceObjectRelationships = (dict[@"relationships"] && (dict[@"relationships"] != [NSNull null])) ? dict[@"relationships"] : nil;
-    if(resourceObjectRelationships){
-        self.relationships = resourceObjectRelationships;
+    
+    
+    NSDictionary *rawResourceObjectRelationshipsDictionary = (rawResourceObjectDictionary[@"relationships"] && (rawResourceObjectDictionary[@"relationships"] != [NSNull null])) ? rawResourceObjectDictionary[@"relationships"] : nil;
+    if(rawResourceObjectRelationshipsDictionary){
+        self.relationships = rawResourceObjectRelationshipsDictionary;
     }
     else
-        resourceObjectRelationships = @{};
+        rawResourceObjectRelationshipsDictionary = @{};
     
     NSDictionary *userMap = [self mapMembersToProperties];
+    
     if([userMap count]>0){
         
         for (NSString *key in [userMap allKeys]) {
-                if ([resourceObjectAttributes objectForKey:key] != nil && [resourceObjectAttributes objectForKey:key] != [NSNull null]) {
+            
+                if ([rawResourceObjectAttributesDictionary objectForKey:key] != nil && [rawResourceObjectAttributesDictionary objectForKey:key] != [NSNull null]) {
                     
-                    NSString *property = [userMap objectForKey:key];
+                    NSString *propertyName = [userMap objectForKey:key];
                     
-                    NSRange formatRange = [property rangeOfString:@":"];
+                    NSRange formatRange = [propertyName rangeOfString:@":"];
                     
                     @try {
                         if (formatRange.location != NSNotFound) {
-                            NSString *formatFunction = [property substringToIndex:formatRange.location];
-                            property = [property substringFromIndex:(formatRange.location+1)];
+                            NSString *formatFunction = [propertyName substringToIndex:formatRange.location];
+                            propertyName = [propertyName substringFromIndex:(formatRange.location+1)];
                             
-                            [self setValue:[JSONAPIResourceFormatter performFormatBlock:[resourceObjectAttributes objectForKey:key] withName:formatFunction] forKey:property ];
+                            [self setValue:[JSONAPIResourceFormatter performFormatBlock:[rawResourceObjectAttributesDictionary objectForKey:key] withName:formatFunction] forKey:propertyName ];
                         } else {
-                            [self setValue:[resourceObjectAttributes objectForKey:key] forKey:property ];
+                            [self setValue:[rawResourceObjectAttributesDictionary objectForKey:key] forKey:propertyName ];
                         }
                     }
                     @catch (NSException *exception) {
-                        NSLog(@"JSONAPIResource Warning - %@", [exception description]);
+                        NSLog(@"%@ warning: %@", NSStringFromClass([self class]),[exception description]);
                     }
-                    
-                } else {
-                    NSLog(@"JSONAPIResource Warning : key %@ not found in json data.", key);
                 }
-                
             }
         }
 }
