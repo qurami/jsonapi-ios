@@ -155,8 +155,11 @@ NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
     [req setHTTPBody: [_requestBody dataUsingEncoding:NSUTF8StringEncoding]];
     _requestReceivedData = nil;
     
+    
     NSLog(@"%@ : session starting with http headers \n %@", NSStringFromClass([self class]), _urlSession.configuration.HTTPAdditionalHeaders);
     NSLog(@"%@ : for apirequest with url %@", NSStringFromClass([self class]), [_requestUrl absoluteString]);
+    
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible: YES];
     
     [[_urlSession dataTaskWithRequest: req] resume];
 
@@ -176,8 +179,9 @@ NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error{
     
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible: NO];
     _requestReceivedStatusCode = [(NSHTTPURLResponse *)task.response statusCode];
-    
+
     if(error){
         NSLog(@"%@ : url session failed with error: %@", NSStringFromClass([self class]), error.localizedDescription);
         [self returnCallbackWithError: error];
