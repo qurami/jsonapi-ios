@@ -151,6 +151,9 @@ NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
 - (void) startSession{
 
     NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL: _requestUrl];
+    
+    //workaround to fix a bug on iOS 8.3 where content type was overridden.
+    [req setValue:@"application/vnd.api+json"  forHTTPHeaderField:@"Content-Type"];
     [req setHTTPMethod: _HTTPMethod];
     [req setHTTPBody: [_requestBody dataUsingEncoding:NSUTF8StringEncoding]];
     _requestReceivedData = nil;
