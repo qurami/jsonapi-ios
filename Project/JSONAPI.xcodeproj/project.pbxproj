@@ -37,6 +37,8 @@
 		03FBD8E31AB8E46E00789DF3 /* error_example.json in Resources */ = {isa = PBXBuildFile; fileRef = 03FBD8E11AB8E46E00789DF3 /* error_example.json */; };
 		452AEA7D1B6A7C9A00160BA2 /* JSONAPIClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 452AEA7C1B6A7C9A00160BA2 /* JSONAPIClient.m */; };
 		4549C58D1B72859800EBBA1D /* JSONAPIJSONEncoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 4549C58C1B72859800EBBA1D /* JSONAPIJSONEncoder.m */; };
+		45EE14961BFBAF3A00C6D481 /* JSONAPIClient+JSONPatchExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 45EE14951BFBAF3A00C6D481 /* JSONAPIClient+JSONPatchExtension.m */; };
+		45EE149A1BFBAF9000C6D481 /* JSONPatchDocument.m in Sources */ = {isa = PBXBuildFile; fileRef = 45EE14991BFBAF9000C6D481 /* JSONPatchDocument.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -94,6 +96,10 @@
 		452AEA7F1B6B854C00160BA2 /* JSONAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JSONAPI.h; sourceTree = "<group>"; };
 		4549C58B1B72859800EBBA1D /* JSONAPIJSONEncoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONAPIJSONEncoder.h; sourceTree = "<group>"; };
 		4549C58C1B72859800EBBA1D /* JSONAPIJSONEncoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONAPIJSONEncoder.m; sourceTree = "<group>"; };
+		45EE14941BFBAF3A00C6D481 /* JSONAPIClient+JSONPatchExtension.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "JSONAPIClient+JSONPatchExtension.h"; sourceTree = "<group>"; };
+		45EE14951BFBAF3A00C6D481 /* JSONAPIClient+JSONPatchExtension.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "JSONAPIClient+JSONPatchExtension.m"; sourceTree = "<group>"; };
+		45EE14981BFBAF9000C6D481 /* JSONPatchDocument.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONPatchDocument.h; sourceTree = "<group>"; };
+		45EE14991BFBAF9000C6D481 /* JSONPatchDocument.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONPatchDocument.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -214,6 +220,7 @@
 		03A055EF1868E08A004807F0 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				45EE14971BFBAF6A00C6D481 /* JSONPatch Extension */,
 				452AEA7F1B6B854C00160BA2 /* JSONAPI.h */,
 				4549C58B1B72859800EBBA1D /* JSONAPIJSONEncoder.h */,
 				4549C58C1B72859800EBBA1D /* JSONAPIJSONEncoder.m */,
@@ -241,6 +248,17 @@
 				03FBD8E11AB8E46E00789DF3 /* error_example.json */,
 			);
 			name = Assets;
+			sourceTree = "<group>";
+		};
+		45EE14971BFBAF6A00C6D481 /* JSONPatch Extension */ = {
+			isa = PBXGroup;
+			children = (
+				45EE14941BFBAF3A00C6D481 /* JSONAPIClient+JSONPatchExtension.h */,
+				45EE14951BFBAF3A00C6D481 /* JSONAPIClient+JSONPatchExtension.m */,
+				45EE14981BFBAF9000C6D481 /* JSONPatchDocument.h */,
+				45EE14991BFBAF9000C6D481 /* JSONPatchDocument.m */,
+			);
+			name = "JSONPatch Extension";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -346,6 +364,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				45EE14961BFBAF3A00C6D481 /* JSONAPIClient+JSONPatchExtension.m in Sources */,
 				452AEA7D1B6A7C9A00160BA2 /* JSONAPIClient.m in Sources */,
 				03866451186A909200985CEC /* PeopleResource.m in Sources */,
 				03866457186A94C200985CEC /* PostResource.m in Sources */,
@@ -359,6 +378,7 @@
 				0386644E186A8DA000985CEC /* JSONAPIResourceModeler.m in Sources */,
 				03A055C71868E038004807F0 /* main.m in Sources */,
 				03FBD8DF1AB8DF8E00789DF3 /* JSONAPIError.m in Sources */,
+				45EE149A1BFBAF9000C6D481 /* JSONPatchDocument.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
