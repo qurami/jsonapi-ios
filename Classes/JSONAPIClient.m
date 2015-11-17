@@ -12,7 +12,7 @@
 
 
 NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
-
+NSString *const JSONAPIMediaType = @"application/vnd.api+json";
 
 @interface JSONAPIClient (){
     
@@ -25,6 +25,10 @@ NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
     NSURL *_requestUrl;
     NSString *_requestBody;
     NSArray *_includedResources;
+    NSArray *_contentExt;
+    NSArray *_acceptExt;
+    NSString *_contentType;
+    NSString *_accept;
     
     NSMutableData *_requestReceivedData;
     NSInteger _requestReceivedStatusCode;
@@ -89,6 +93,20 @@ NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
 
 }
 
+- (void) genericOperationWithJsonApiContentTypeExtensions: (NSArray *) contentTypeExtensions acceptExtensions: (NSArray *) acceptExtensions jsonBody: (NSString *) body HTTPMethod: (NSString *) httpMethod resourcePath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *document, NSInteger statusCode, NSError *error)) completionHandler{
+    
+    _HTTPMethod = httpMethod;
+    _includedResources = nil;
+    _apiPath = path;
+    _requestBody = body;
+    _completionHandler = completionHandler;
+    _contentExt = contentTypeExtensions;
+    _acceptExt = acceptExtensions;
+    
+    [self startApiCall];
+
+}
+
 
 
 
@@ -105,10 +123,20 @@ NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
 
 - (void) buildHeaders{
     
+    _contentType = JSONAPIMediaType;
+    _accept = JSONAPIMediaType;
+    
+    if(_contentExt && [_contentExt count] > 0){
+        _contentType = [_contentType stringByAppendingString:[NSString stringWithFormat:@" ext=\"%@\"", [_contentExt componentsJoinedByString:@","]]];
+    }
+    
+    if(_acceptExt && [_acceptExt count] > 0){
+        _accept = [_accept stringByAppendingString:[NSString stringWithFormat:@" ext=\"%@\"", [_acceptExt componentsJoinedByString:@","]]];
+    }
     
     NSDictionary *jsonAPIHTTPHeaders = @{
-                                         @"Content-Type" : @"application/vnd.api+json",
-                                         @"Accept" : @"application/vnd.api+json"
+                                         @"Content-Type" : _contentType,
+                                         @"Accept" : _accept
                                              };
     
     [self appendAdditionalHTTPHeaders: jsonAPIHTTPHeaders];
@@ -153,7 +181,7 @@ NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
     NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL: _requestUrl];
     
     //workaround to fix a bug on iOS 8.3 where content type was overridden.
-    [req setValue:@"application/vnd.api+json"  forHTTPHeaderField:@"Content-Type"];
+    [req setValue:_contentType  forHTTPHeaderField:@"Content-Type"];
     [req setHTTPMethod: _HTTPMethod];
     [req setHTTPBody: [_requestBody dataUsingEncoding:NSUTF8StringEncoding]];
     _requestReceivedData = nil;
@@ -206,7 +234,20 @@ NSString *const JSONAPIClientErrorDomain = @"JSONAPIClientErrorDomain";
     [session invalidateAndCancel];
 }
 
+- (BOOL) responseMimeTypeIsValid: (NSString *) responseMimeType{
+    
+    BOOL returnValue = [responseMimeType rangeOfString: JSONAPIMediaType].location != NSNotFound;
+    
+    if(_acceptExt && [_acceptExt count] > 0){
+        
+        NSString *expectedExtension = [NSString stringWithFormat:@"ext=\"%@\"", [_acceptExt componentsJoinedByString:@","]];
+        
+        returnValue = [responseMimeType rangeOfString: expectedExtension].location != NSNotFound;
+    }
+    
+    return returnValue;
 
+}
 
 - (void) URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didReceiveChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential *))completionHandler{
     

@@ -32,7 +32,6 @@ typedef enum JSONAPIErrorCodes{
 
 - (void) appendAdditionalHTTPHeaders: (NSDictionary *) additionalHeaders;
 
-
 - (void) getJSONAPIDocumentWithPath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *jsonApiDocument, NSInteger statusCode, NSError *error)) completionHandler;
 
 - (void) getJSONAPIDocumentWithPath: (NSString *) path includedResourceTypes: (NSArray *) includedResourceTypes completionHandler: (void(^)(JSONAPIDocument *jsonApiDocument, NSInteger statusCode, NSError *error)) completionHandler;
@@ -43,4 +42,8 @@ typedef enum JSONAPIErrorCodes{
 
 - (void) deleteJSONAPIResourceWithPath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *jsonApiDocument, NSInteger statusCode, NSError *error)) completionHandler;
 
+- (void) genericOperationWithJsonApiContentTypeExtensions: (NSArray *) contentTypeExtensions acceptExtensions: (NSArray *) acceptExtensions jsonBody: (NSString *) body HTTPMethod: (NSString *) httpMethod resourcePath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *document, NSInteger statusCode, NSError *error)) completionHandler;
+
+
 @end
+
