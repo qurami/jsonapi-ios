@@ -29,6 +29,7 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     NSArray *_acceptExt;
     NSString *_contentType;
     NSString *_accept;
+    NSString *_queryParameters;
     
     NSMutableData *_requestReceivedData;
     NSInteger _requestReceivedStatusCode;
@@ -93,7 +94,7 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
 
 }
 
-- (void) genericOperationWithJsonApiContentTypeExtensions: (NSArray *) contentTypeExtensions acceptExtensions: (NSArray *) acceptExtensions jsonBody: (NSString *) body HTTPMethod: (NSString *) httpMethod resourcePath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *document, NSInteger statusCode, NSError *error)) completionHandler{
+- (void) extensionRequestWithContentTypeExtensions: (NSArray *) contentTypeExtensions acceptExtensions: (NSArray *) acceptExtensions queryParameters:(NSString *) params requestBody: (NSString *) body HTTPMethod: (NSString *) httpMethod resourcePath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *document, NSInteger statusCode, NSError *error)) completionHandler{
     
     _HTTPMethod = httpMethod;
     _includedResources = nil;
@@ -102,6 +103,7 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     _completionHandler = completionHandler;
     _contentExt = contentTypeExtensions;
     _acceptExt = acceptExtensions;
+    _queryParameters = params;
     
     [self startApiCall];
 
@@ -157,9 +159,25 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     
     NSString *urlString = [_endpoint stringByAppendingPathComponent: _apiPath];
     
-    if(_includedResources){
-        NSString *elements = [_includedResources componentsJoinedByString:@","];
-        urlString = [urlString stringByAppendingString:[NSString stringWithFormat:@"?include=%@", elements]];
+    
+    if((_includedResources && [_includedResources count] > 0) || (_queryParameters && [_queryParameters length] > 0)){
+        
+        NSMutableArray *urlParameters = [NSMutableArray new];
+        
+        if(_includedResources && [_includedResources count] > 0){
+            NSString *included = [NSString stringWithFormat:@"include=%@", [_includedResources componentsJoinedByString:@","]];
+            [urlParameters addObject: included];
+        }
+        
+        if(_queryParameters && [_queryParameters length] > 0){
+            
+            if([_queryParameters hasPrefix:@"?"])
+                _queryParameters = [_queryParameters substringFromIndex:1];
+            
+            [urlParameters addObject: _queryParameters];
+        }
+        
+        urlString = [urlString stringByAppendingString:[NSString stringWithFormat:@"?%@", [urlParameters componentsJoinedByString:@"&"]]];
     }
     
     _requestUrl = [NSURL URLWithString: urlString];
