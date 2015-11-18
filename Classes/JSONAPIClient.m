@@ -238,9 +238,8 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     else{
 
         NSString *mimeType = task.response.MIMEType;
-        BOOL isJSONAPIMimeType = [mimeType  rangeOfString:@"application/vnd.api+json"].location != NSNotFound;
         
-        if(isJSONAPIMimeType || _requestReceivedStatusCode == 204){
+        if([self responseMimeTypeIsValid: mimeType] || _requestReceivedStatusCode == 204){
             [self jsonApiCallCompletedWithData: _requestReceivedData statusCode: _requestReceivedStatusCode];
         }
         else{
