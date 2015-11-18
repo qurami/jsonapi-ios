@@ -16,8 +16,7 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
 
 @interface JSONAPIClient (){
     
-    void (^_completionHandler)(JSONAPIDocument *jsonApiDocument, NSInteger statusCode, NSError *error);
-    void (^_extensionCompletionHandler)(NSData *retrievedData, NSInteger statusCode, NSError *error);
+    void (^_completionHandler)(NSData *retrievedData, NSInteger statusCode, NSError *error);
     
     NSString *_HTTPMethod;
     NSMutableDictionary *_additionalHTTPHeaders;
@@ -44,6 +43,80 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
 
 #pragma mark - HTTPMethods
 
+
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        _contentType = JSONAPIMediaType;
+        _accept = JSONAPIMediaType;
+    }
+    return self;
+}
+
+- (void) appendQueryParameters: (NSDictionary <NSString *, NSString *> *) queryParameters{
+
+    NSMutableArray *queryItems = [NSMutableArray new];
+    
+    for (NSString *key in [queryParameters allKeys]){
+        NSString *value = queryParameters[key];
+        [queryItems addObject:[NSString stringWithFormat:@"%@=%@", key, value]];
+    }
+    
+    NSString *queryString = [queryItems componentsJoinedByString:@"&"];
+    
+    if(!_queryParameters){
+        _queryParameters = [NSString stringWithFormat:@"?%@", queryString];
+    }
+    else{
+        _queryParameters = [_queryParameters stringByAppendingString:[NSString stringWithFormat:@"&%@", queryString]];
+    }
+    
+}
+
+- (void) appendRequestBody: (NSString *) body{
+    
+    if(_requestBody)
+        _requestBody = body;
+    else
+        _requestBody = [_requestBody stringByAppendingString: body];
+
+}
+
+- (void) setContentTypeExtension: (NSArray <NSString *> *) contentTypeExtensions acceptExtensions: (NSArray <NSString *> *) acceptExtensions{
+    
+    if(_contentExt && [_contentExt count] > 0){
+        _contentType = [_contentType stringByAppendingString:[NSString stringWithFormat:@" ext=\"%@\"", [_contentExt componentsJoinedByString:@","]]];
+    }
+    
+    if(_acceptExt && [_acceptExt count] > 0){
+        _accept = [_accept stringByAppendingString:[NSString stringWithFormat:@" ext=\"%@\"", [_acceptExt componentsJoinedByString:@","]]];
+    }
+    
+}
+
+- (void) genericRequestWithHTTPMethod: (NSString *) httpMethod resourcePath: (NSString *) path completionHandler: (void(^)(NSData *retrievedData, NSInteger statusCode, NSError *error)) completionHandler{
+    
+    _HTTPMethod = httpMethod;
+    _apiPath = path;
+    _completionHandler = completionHandler;
+    
+    [self startApiCall];
+    
+}
+
+#pragma mark - JSONAPI Protocl Methods
+
+
+- (void) appendIncludedResourcesToQueryParameters: (NSArray *) includedResources{
+
+    if(includedResources && [includedResources count] > 0){
+        
+        NSString *resourcesString = [includedResources componentsJoinedByString:@","];
+        [self appendQueryParameters:@{@"include" : resourcesString}];
+    }
+}
+
 - (void) getJSONAPIDocumentWithPath: (NSString *) path completionHandler:(void (^)(JSONAPIDocument *jsonApi, NSInteger statusCode, NSError *error))completionHandler{
 
     [self getJSONAPIDocumentWithPath: path includedResourceTypes: nil completionHandler: completionHandler];
@@ -51,14 +124,12 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
 }
 
 - (void) getJSONAPIDocumentWithPath: (NSString *) path includedResourceTypes: (NSArray *) includedResourceTypes completionHandler:(void (^)(JSONAPIDocument *jsonApi, NSInteger statusCode, NSError *error))completionHandler{
+
+    [self appendIncludedResourcesToQueryParameters: includedResourceTypes];
+    [self genericRequestWithHTTPMethod: @"GET" resourcePath: path completionHandler:^(NSData *retrievedData, NSInteger statusCode, NSError *error) {
+        [self jsonApiCallCompletedWithData: retrievedData statusCode: statusCode error: error callbackHandler: completionHandler];
+    }];
     
-    _HTTPMethod = @"GET";
-    _includedResources = includedResourceTypes;
-    _completionHandler = completionHandler;
-    _apiPath = path;
-    _extensionCompletionHandler = nil;
-    
-    [self startApiCall];
 }
 
 - (void) postJSONAPIDocument: (JSONAPIDocument *) documentToPost withPath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *jsonApiDocument, NSInteger statusCode, NSError *error)) completionHandler{
@@ -69,51 +140,23 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
 }
 
 - (void) postJSONAPIDocument: (JSONAPIDocument *) documentToPost withPath: (NSString *) path includedResources: (NSArray *) includedResourceTypes completionHandler: (void(^)(JSONAPIDocument *jsonApiDocument, NSInteger statusCode, NSError *error)) completionHandler{
-
     
-    _HTTPMethod = @"POST";
-    _includedResources = includedResourceTypes;
-    _completionHandler = completionHandler;
-    _apiPath = path;
-    _requestBody = [JSONAPIJSONEncoder jsonEncodedStringForJSONAPIDocument: documentToPost];
-    _extensionCompletionHandler = nil;
-    
-    [self startApiCall];
-    
+    [self appendIncludedResourcesToQueryParameters: _includedResources];
+    [self appendRequestBody:[JSONAPIJSONEncoder jsonEncodedStringForJSONAPIDocument: documentToPost]];
+    [self genericRequestWithHTTPMethod:@"POST" resourcePath:path completionHandler:^(NSData *retrievedData, NSInteger statusCode, NSError *error) {
+        [self jsonApiCallCompletedWithData: retrievedData statusCode: statusCode error: error callbackHandler: completionHandler];
+    }];
 
 }
 
 
 - (void) deleteJSONAPIResourceWithPath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *jsonApiDocument ,NSInteger statusCode, NSError *error)) completionHandler{
     
-    _HTTPMethod = @"DELETE";
-    _includedResources = nil;
-    _apiPath = path;
-    _requestBody = nil;
-    _completionHandler = completionHandler;
-    _extensionCompletionHandler = nil;
-    
-    [self startApiCall];
+    [self genericRequestWithHTTPMethod:@"DELETE" resourcePath:path completionHandler:^(NSData *retrievedData, NSInteger statusCode, NSError *error) {
+        [self jsonApiCallCompletedWithData: retrievedData statusCode: statusCode error: error callbackHandler: completionHandler];
+    }];
 
 }
-
-- (void) extensionRequestWithContentTypeExtensions: (NSArray *) contentTypeExtensions acceptExtensions: (NSArray *) acceptExtensions queryParameters:(NSString *) params requestBody: (NSString *) body HTTPMethod: (NSString *) httpMethod resourcePath: (NSString *) path completionHandler: (void(^)(NSData *retrievedData, NSInteger statusCode, NSError *error)) completionHandler{
-    
-    _HTTPMethod = httpMethod;
-    _includedResources = nil;
-    _apiPath = path;
-    _requestBody = body;
-    _completionHandler = nil;
-    _extensionCompletionHandler = completionHandler;
-    _contentExt = contentTypeExtensions;
-    _acceptExt = acceptExtensions;
-    _queryParameters = params;
-    
-    [self startApiCall];
-
-}
-
-
 
 
 #pragma mark - API Call
@@ -128,18 +171,7 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
 }
 
 - (void) buildHeaders{
-    
-    _contentType = JSONAPIMediaType;
-    _accept = JSONAPIMediaType;
-    
-    if(_contentExt && [_contentExt count] > 0){
-        _contentType = [_contentType stringByAppendingString:[NSString stringWithFormat:@" ext=\"%@\"", [_contentExt componentsJoinedByString:@","]]];
-    }
-    
-    if(_acceptExt && [_acceptExt count] > 0){
-        _accept = [_accept stringByAppendingString:[NSString stringWithFormat:@" ext=\"%@\"", [_acceptExt componentsJoinedByString:@","]]];
-    }
-    
+
     NSDictionary *jsonAPIHTTPHeaders = @{
                                          @"Content-Type" : _contentType,
                                          @"Accept" : _accept
@@ -163,26 +195,8 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     
     NSString *urlString = [_endpoint stringByAppendingPathComponent: _apiPath];
     
-    
-    if((_includedResources && [_includedResources count] > 0) || (_queryParameters && [_queryParameters length] > 0)){
-        
-        NSMutableArray *urlParameters = [NSMutableArray new];
-        
-        if(_includedResources && [_includedResources count] > 0){
-            NSString *included = [NSString stringWithFormat:@"include=%@", [_includedResources componentsJoinedByString:@","]];
-            [urlParameters addObject: included];
-        }
-        
-        if(_queryParameters && [_queryParameters length] > 0){
-            
-            if([_queryParameters hasPrefix:@"?"])
-                _queryParameters = [_queryParameters substringFromIndex:1];
-            
-            [urlParameters addObject: _queryParameters];
-        }
-        
-        urlString = [urlString stringByAppendingString:[NSString stringWithFormat:@"?%@", [urlParameters componentsJoinedByString:@"&"]]];
-    }
+    if(_queryParameters)
+        urlString = [urlString stringByAppendingString: _queryParameters];
     
     _requestUrl = [NSURL URLWithString: urlString];
 }
@@ -235,22 +249,27 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible: NO];
     _requestReceivedStatusCode = [(NSHTTPURLResponse *)task.response statusCode];
 
-    if(error){
-        NSLog(@"%@ : url session failed with error: %@", NSStringFromClass([self class]), error.localizedDescription);
-        [self returnCallbackWithError: error];
-    }
-    else{
 
-        NSString *mimeType = task.response.MIMEType;
+    if(_completionHandler){
         
-        if([self responseMimeTypeIsValid: mimeType] || _requestReceivedStatusCode == 204){
-            [self jsonApiCallCompletedWithData: _requestReceivedData statusCode: _requestReceivedStatusCode];
+        if(error){
+            _completionHandler(nil, _requestReceivedStatusCode, error);
         }
         else{
-            [self returnCallbackWithError:[self mimetypeError]];
+            
+            NSString *mimeType = task.response.MIMEType;
+            
+            if(_requestReceivedStatusCode != 204 && ![self responseMimeTypeIsValid: mimeType]){
+                _completionHandler(nil,_requestReceivedStatusCode, [self mimetypeError]);
+            }
+            else{
+                _completionHandler(_requestReceivedData, _requestReceivedStatusCode, nil);
+            }
         }
-    }
+        
     
+    
+    }
     
     [session invalidateAndCancel];
 }
@@ -285,36 +304,27 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
 
 #pragma mark - Callbacks
 
-- (void) jsonApiCallCompletedWithData: (NSData *) data statusCode: (NSInteger) statusCode{
+- (void) jsonApiCallCompletedWithData: (NSData *) data statusCode: (NSInteger) statusCode error: (NSError *) error callbackHandler: (void(^)(JSONAPIDocument *document, NSInteger statusCode, NSError *error)) callbackHandler{
     
-    
-    if(statusCode == 204){
-        _completionHandler(nil, statusCode, nil);
-    }
-    else{
-        
-        if(_extensionCompletionHandler){
-            _extensionCompletionHandler(data, statusCode, nil);
+    if(callbackHandler){
+        if(statusCode == 204){
+            callbackHandler(nil, statusCode, nil);
         }
         else{
-            
             NSString *jsonDataString = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
             JSONAPIDocument *jsonApiDocument = [JSONAPIDocument jsonAPIDocumentWithString: jsonDataString];
             
-            if(!jsonApiDocument)
-                [self returnCallbackWithError: [self jsonPatchSerializationError]];
-            
+            if(!jsonApiDocument){
+                callbackHandler(nil, statusCode, [self malformedDataError]);
+            }
             else{
-                if(_completionHandler)
-                    _completionHandler(jsonApiDocument, statusCode, nil);
+                callbackHandler(jsonApiDocument, statusCode, nil);
             }
         }
-        
     }
-    
 }
 
-- (NSError *) jsonPatchSerializationError{
+- (NSError *) malformedDataError{
     
     NSDictionary *userInfo = @{
                                NSLocalizedDescriptionKey: @"bad response",
@@ -343,14 +353,5 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     
 }
 
-- (void) returnCallbackWithError: (NSError *) error{
-
-    if(_completionHandler)
-        _completionHandler(nil, _requestReceivedStatusCode, error);
-    
-    else if(_extensionCompletionHandler)
-        _extensionCompletionHandler(nil,_requestReceivedStatusCode, error);
-
-}
 
 @end

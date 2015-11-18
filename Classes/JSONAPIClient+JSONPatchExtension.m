@@ -35,8 +35,9 @@
 
         NSString *jsonString = [[NSString alloc] initWithData: jsonData encoding: NSUTF8StringEncoding];
         
-        [self extensionRequestWithContentTypeExtensions: @[@"jsonpatch"] acceptExtensions:@[@"jsonpatch"] queryParameters: nil requestBody: jsonString HTTPMethod:@"PATCH" resourcePath: resourcePath completionHandler:^(NSData *retrievedData, NSInteger statusCode, NSError *error) {
-
+        [self setContentTypeExtension:@[@"jsonpatch"] acceptExtensions:@[@"jsonpatch"]];
+        [self appendRequestBody: jsonString];
+        [self genericRequestWithHTTPMethod:@"PATCH" resourcePath: resourcePath completionHandler:^(NSData *retrievedData, NSInteger statusCode, NSError *error) {
             if(completionHandler){
                 
                 if(error)
@@ -45,28 +46,44 @@
                 else{
                     
                     NSError *deserializationError;
-                    NSArray *rawData = [NSJSONSerialization JSONObjectWithData: retrievedData options:0 error: &deserializationError];
+                    id rawData = [NSJSONSerialization JSONObjectWithData: retrievedData options:0 error: &deserializationError];
+                    
                     
                     if(deserializationError){
                         completionHandler(nil, statusCode, [self jsonDocumentsArrayDeserializationError]);
                     }
                     else{
                         
-                        NSMutableArray *jsonApiDocumentsArray = [[NSMutableArray alloc] initWithCapacity:[rawData count]];
+                        NSMutableArray *jsonApiDocumentsArray = [NSMutableArray new];
                         
-                        for(NSDictionary *rawJsonDocumentDictionary in rawData){
-                            JSONAPIDocument *thisDoc = [[JSONAPIDocument alloc] initWithDictionary: rawJsonDocumentDictionary];
+                        if([rawData isKindOfClass:[NSArray class]]){
+                            NSMutableArray *jsonApiDocumentsArray = [[NSMutableArray alloc] initWithCapacity:[rawData count]];
+                            for(NSDictionary *rawJsonDocumentDictionary in rawData){
+                                JSONAPIDocument *thisDoc = [[JSONAPIDocument alloc] initWithDictionary: rawJsonDocumentDictionary];
+                                if(thisDoc)
+                                    [jsonApiDocumentsArray addObject: thisDoc];
+                            }
+                            
+                        }
+                        else if ([rawData isKindOfClass: [NSDictionary class]]){
+                            
+                            JSONAPIDocument *thisDoc = [[JSONAPIDocument alloc] initWithDictionary: rawData];
                             if(thisDoc)
                                 [jsonApiDocumentsArray addObject: thisDoc];
+                            
                         }
                         
-                        completionHandler(jsonApiDocumentsArray, statusCode, nil);
+                        if([jsonApiDocumentsArray count] > 0)
+                            completionHandler(jsonApiDocumentsArray, statusCode, nil);
+                        else
+                            completionHandler(nil,statusCode,[self jsonDocumentsArrayDeserializationError]);
+                        
                     }
+                    
                 }
             }
-            
+
         }];
-        
     }
 
 }
