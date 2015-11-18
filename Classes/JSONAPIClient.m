@@ -17,7 +17,7 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
 @interface JSONAPIClient (){
     
     void (^_completionHandler)(JSONAPIDocument *jsonApiDocument, NSInteger statusCode, NSError *error);
-    
+    void (^_extensionCompletionHandler)(NSData *retrievedData, NSInteger statusCode, NSError *error);
     
     NSString *_HTTPMethod;
     NSMutableDictionary *_additionalHTTPHeaders;
@@ -56,6 +56,7 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     _includedResources = includedResourceTypes;
     _completionHandler = completionHandler;
     _apiPath = path;
+    _extensionCompletionHandler = nil;
     
     [self startApiCall];
 }
@@ -75,6 +76,7 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     _completionHandler = completionHandler;
     _apiPath = path;
     _requestBody = [JSONAPIJSONEncoder jsonEncodedStringForJSONAPIDocument: documentToPost];
+    _extensionCompletionHandler = nil;
     
     [self startApiCall];
     
@@ -89,18 +91,20 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     _apiPath = path;
     _requestBody = nil;
     _completionHandler = completionHandler;
+    _extensionCompletionHandler = nil;
     
     [self startApiCall];
 
 }
 
-- (void) extensionRequestWithContentTypeExtensions: (NSArray *) contentTypeExtensions acceptExtensions: (NSArray *) acceptExtensions queryParameters:(NSString *) params requestBody: (NSString *) body HTTPMethod: (NSString *) httpMethod resourcePath: (NSString *) path completionHandler: (void(^)(JSONAPIDocument *document, NSInteger statusCode, NSError *error)) completionHandler{
+- (void) extensionRequestWithContentTypeExtensions: (NSArray *) contentTypeExtensions acceptExtensions: (NSArray *) acceptExtensions queryParameters:(NSString *) params requestBody: (NSString *) body HTTPMethod: (NSString *) httpMethod resourcePath: (NSString *) path completionHandler: (void(^)(NSData *retrievedData, NSInteger statusCode, NSError *error)) completionHandler{
     
     _HTTPMethod = httpMethod;
     _includedResources = nil;
     _apiPath = path;
     _requestBody = body;
-    _completionHandler = completionHandler;
+    _completionHandler = nil;
+    _extensionCompletionHandler = completionHandler;
     _contentExt = contentTypeExtensions;
     _acceptExt = acceptExtensions;
     _queryParameters = params;
@@ -289,23 +293,28 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     }
     else{
         
-        NSString *jsonDataString = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
-        JSONAPIDocument *jsonApiDocument = [JSONAPIDocument jsonAPIDocumentWithString: jsonDataString];
-        
-        if(!jsonApiDocument)
-            [self returnCallbackWithError: [self malformedDataError]];
-        
+        if(_extensionCompletionHandler){
+            _extensionCompletionHandler(data, statusCode, nil);
+        }
         else{
-            if(_completionHandler)
-                _completionHandler(jsonApiDocument, statusCode, nil);
+            
+            NSString *jsonDataString = [[NSString alloc] initWithData: data encoding: NSUTF8StringEncoding];
+            JSONAPIDocument *jsonApiDocument = [JSONAPIDocument jsonAPIDocumentWithString: jsonDataString];
+            
+            if(!jsonApiDocument)
+                [self returnCallbackWithError: [self jsonPatchSerializationError]];
+            
+            else{
+                if(_completionHandler)
+                    _completionHandler(jsonApiDocument, statusCode, nil);
+            }
         }
         
-    
     }
     
 }
 
-- (NSError *) malformedDataError{
+- (NSError *) jsonPatchSerializationError{
     
     NSDictionary *userInfo = @{
                                NSLocalizedDescriptionKey: @"bad response",
@@ -338,6 +347,9 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
 
     if(_completionHandler)
         _completionHandler(nil, _requestReceivedStatusCode, error);
+    
+    else if(_extensionCompletionHandler)
+        _extensionCompletionHandler(nil,_requestReceivedStatusCode, error);
 
 }
 
