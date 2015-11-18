@@ -62,7 +62,7 @@
 }
 
 
-- (NSDictionary *) convertToDictionary{
+- (NSDictionary *) toDictionary{
 
     NSString *operation = nil;
     switch (self.op) {

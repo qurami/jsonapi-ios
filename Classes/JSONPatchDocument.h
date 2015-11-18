@@ -27,5 +27,6 @@ typedef enum JSONPatchOperation{
 
 - (NSString *) convertToJsonStringWithError: (NSError **) error;
 - (NSData *) convertToJsonDataWithError: (NSError **) error;
+- (NSDictionary *) toDictionary;
 
 @end
