@@ -23,7 +23,6 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     NSString *_apiPath;
     NSURL *_requestUrl;
     NSString *_requestBody;
-    NSArray *_includedResources;
     NSArray *_contentExt;
     NSArray *_acceptExt;
     NSString *_contentType;
@@ -31,7 +30,6 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     NSString *_queryParameters;
     
     NSMutableData *_requestReceivedData;
-    NSInteger _requestReceivedStatusCode;
     
     NSURLSession *_urlSession;
 
@@ -76,7 +74,7 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
 
 - (void) appendRequestBody: (NSString *) body{
     
-    if(_requestBody)
+    if(!_requestBody)
         _requestBody = body;
     else
         _requestBody = [_requestBody stringByAppendingString: body];
@@ -85,12 +83,14 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
 
 - (void) setContentTypeExtension: (NSArray <NSString *> *) contentTypeExtensions acceptExtensions: (NSArray <NSString *> *) acceptExtensions{
     
-    if(_contentExt && [_contentExt count] > 0){
-        _contentType = [_contentType stringByAppendingString:[NSString stringWithFormat:@" ext=\"%@\"", [_contentExt componentsJoinedByString:@","]]];
+    if(contentTypeExtensions && [contentTypeExtensions count] > 0){
+        _contentExt = contentTypeExtensions;
+        _contentType = [_contentType stringByAppendingString:[NSString stringWithFormat:@"; ext=\"%@\"", [contentTypeExtensions componentsJoinedByString:@","]]];
     }
     
-    if(_acceptExt && [_acceptExt count] > 0){
-        _accept = [_accept stringByAppendingString:[NSString stringWithFormat:@" ext=\"%@\"", [_acceptExt componentsJoinedByString:@","]]];
+    if(acceptExtensions && [acceptExtensions count] > 0){
+        _acceptExt = acceptExtensions;
+        _accept = [_accept stringByAppendingString:[NSString stringWithFormat:@"; ext=\"%@\"", [acceptExtensions componentsJoinedByString:@","]]];
     }
     
 }
@@ -141,7 +141,7 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
 
 - (void) postJSONAPIDocument: (JSONAPIDocument *) documentToPost withPath: (NSString *) path includedResources: (NSArray *) includedResourceTypes completionHandler: (void(^)(JSONAPIDocument *jsonApiDocument, NSInteger statusCode, NSError *error)) completionHandler{
     
-    [self appendIncludedResourcesToQueryParameters: _includedResources];
+    [self appendIncludedResourcesToQueryParameters: includedResourceTypes];
     [self appendRequestBody:[JSONAPIJSONEncoder jsonEncodedStringForJSONAPIDocument: documentToPost]];
     [self genericRequestWithHTTPMethod:@"POST" resourcePath:path completionHandler:^(NSData *retrievedData, NSInteger statusCode, NSError *error) {
         [self jsonApiCallCompletedWithData: retrievedData statusCode: statusCode error: error callbackHandler: completionHandler];
@@ -224,6 +224,10 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     
     
     NSLog(@"%@ : session starting with http headers \n %@", NSStringFromClass([self class]), _urlSession.configuration.HTTPAdditionalHeaders);
+
+    if(_requestBody)
+        NSLog(@"%@ : body of the request: %@",  NSStringFromClass([self class]), _requestBody);
+    
     NSLog(@"%@ : for apirequest with url %@", NSStringFromClass([self class]), [_requestUrl absoluteString]);
     
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible: YES];
@@ -247,23 +251,23 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(NSError *)error{
     
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible: NO];
-    _requestReceivedStatusCode = [(NSHTTPURLResponse *)task.response statusCode];
+    NSInteger receivedStatusCode = [(NSHTTPURLResponse *)task.response statusCode];
 
 
     if(_completionHandler){
         
         if(error){
-            _completionHandler(nil, _requestReceivedStatusCode, error);
+            _completionHandler(nil, receivedStatusCode, error);
         }
         else{
             
             NSString *mimeType = task.response.MIMEType;
             
-            if(_requestReceivedStatusCode != 204 && ![self responseMimeTypeIsValid: mimeType]){
-                _completionHandler(nil,_requestReceivedStatusCode, [self mimetypeError]);
+            if(receivedStatusCode != 204 && ![self responseMimeTypeIsValid: mimeType]){
+                _completionHandler(nil,receivedStatusCode, [self mimetypeError]);
             }
             else{
-                _completionHandler(_requestReceivedData, _requestReceivedStatusCode, nil);
+                _completionHandler(_requestReceivedData, receivedStatusCode, nil);
             }
         }
         
