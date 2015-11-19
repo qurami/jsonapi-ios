@@ -275,7 +275,9 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
         }
         else{
             
-            NSString *mimeType = task.response.MIMEType;
+            NSHTTPURLResponse *response = (NSHTTPURLResponse *)task.response;
+            NSDictionary *headers = [response allHeaderFields];
+            NSString *mimeType = headers[@"Content-Type"];
             
             if(receivedStatusCode != 204 && ![self responseMimeTypeIsValid: mimeType]){
                 _completionHandler(nil,receivedStatusCode, [self mimetypeError]);
