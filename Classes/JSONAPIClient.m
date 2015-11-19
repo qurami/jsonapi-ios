@@ -46,10 +46,24 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
 {
     self = [super init];
     if (self) {
-        _contentType = JSONAPIMediaType;
-        _accept = JSONAPIMediaType;
+        [self setupClientParameters];
     }
     return self;
+}
+
+- (void) setupClientParameters{
+
+    _HTTPMethod = nil;
+    _apiPath = nil;
+    _requestUrl = nil;
+    _requestBody = nil;
+    _contentExt = nil;
+    _acceptExt = nil;
+    _contentType = JSONAPIMediaType;
+    _accept = JSONAPIMediaType;
+    _queryParameters = nil;
+    
+
 }
 
 - (void) appendQueryParameters: (NSDictionary <NSString *, NSString *> *) queryParameters{
@@ -275,6 +289,7 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     
     }
     
+    [self setupClientParameters];
     [session invalidateAndCancel];
 }
 
