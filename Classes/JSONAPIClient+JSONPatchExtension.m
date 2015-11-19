@@ -45,44 +45,53 @@
                 
                 else{
                     
-                    NSError *deserializationError;
-                    id rawData = [NSJSONSerialization JSONObjectWithData: retrievedData options:0 error: &deserializationError];
-                    
-                    
-                    if(deserializationError){
+                    if(!retrievedData && statusCode != 204){
                         completionHandler(nil, statusCode, [self jsonDocumentsArrayDeserializationError]);
+                    }
+                    else if(statusCode == 204){
+                        completionHandler(nil, statusCode, nil);
                     }
                     else{
                         
-                        NSMutableArray *jsonApiDocumentsArray = [NSMutableArray new];
+                        NSError *deserializationError;
+                        id rawData = [NSJSONSerialization JSONObjectWithData: retrievedData options:0 error: &deserializationError];
                         
-                        if([rawData isKindOfClass:[NSArray class]]){
-                            NSMutableArray *jsonApiDocumentsArray = [[NSMutableArray alloc] initWithCapacity:[rawData count]];
-                            for(NSDictionary *rawJsonDocumentDictionary in rawData){
-                                JSONAPIDocument *thisDoc = [[JSONAPIDocument alloc] initWithDictionary: rawJsonDocumentDictionary];
+                        
+                        if(deserializationError){
+                            completionHandler(nil, statusCode, [self jsonDocumentsArrayDeserializationError]);
+                        }
+                        else{
+                            
+                            NSMutableArray *jsonApiDocumentsArray = [NSMutableArray new];
+                            
+                            if([rawData isKindOfClass:[NSArray class]]){
+                                NSMutableArray *jsonApiDocumentsArray = [[NSMutableArray alloc] initWithCapacity:[rawData count]];
+                                for(NSDictionary *rawJsonDocumentDictionary in rawData){
+                                    JSONAPIDocument *thisDoc = [[JSONAPIDocument alloc] initWithDictionary: rawJsonDocumentDictionary];
+                                    if(thisDoc)
+                                        [jsonApiDocumentsArray addObject: thisDoc];
+                                }
+                                
+                            }
+                            else if ([rawData isKindOfClass: [NSDictionary class]]){
+                                
+                                JSONAPIDocument *thisDoc = [[JSONAPIDocument alloc] initWithDictionary: rawData];
                                 if(thisDoc)
                                     [jsonApiDocumentsArray addObject: thisDoc];
+                                
                             }
                             
-                        }
-                        else if ([rawData isKindOfClass: [NSDictionary class]]){
-                            
-                            JSONAPIDocument *thisDoc = [[JSONAPIDocument alloc] initWithDictionary: rawData];
-                            if(thisDoc)
-                                [jsonApiDocumentsArray addObject: thisDoc];
+                            if([jsonApiDocumentsArray count] > 0)
+                                completionHandler(jsonApiDocumentsArray, statusCode, nil);
+                            else
+                                completionHandler(nil,statusCode,[self jsonDocumentsArrayDeserializationError]);
                             
                         }
-                        
-                        if([jsonApiDocumentsArray count] > 0)
-                            completionHandler(jsonApiDocumentsArray, statusCode, nil);
-                        else
-                            completionHandler(nil,statusCode,[self jsonDocumentsArrayDeserializationError]);
-                        
                     }
                     
                 }
             }
-
+            
         }];
     }
 
