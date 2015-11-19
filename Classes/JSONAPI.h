@@ -13,3 +13,6 @@
 #import "JSONAPIError.h"
 #import "JSONAPIClient.h"
 #import "JSONAPIJSONEncoder.h"
+
+#import "JSONAPIClient+JSONPatchExtension.h"
+#import "JSONPatchDocument.h"
