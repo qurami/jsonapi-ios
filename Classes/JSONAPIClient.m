@@ -231,7 +231,18 @@ NSString *const JSONAPIMediaType = @"application/vnd.api+json";
     NSMutableURLRequest *req = [NSMutableURLRequest requestWithURL: _requestUrl];
     
     //workaround to fix a bug on iOS 8.3 where content type was overridden.
-    [req setValue:_contentType  forHTTPHeaderField:@"Content-Type"];
+    if ([[[UIDevice currentDevice] systemVersion] compare:@"8.3" options:NSNumericSearch] == NSOrderedSame){
+        
+        
+        [req setValue:_contentType  forHTTPHeaderField:@"Content-Type"];
+        
+        if(_additionalHTTPHeaders){
+            for (id headerKey in [_additionalHTTPHeaders allKeys]) {
+                [req setValue: _additionalHTTPHeaders[headerKey] forHTTPHeaderField: headerKey];
+            }
+        }
+    }
+    
     [req setHTTPMethod: _HTTPMethod];
     [req setHTTPBody: [_requestBody dataUsingEncoding:NSUTF8StringEncoding]];
     _requestReceivedData = nil;
